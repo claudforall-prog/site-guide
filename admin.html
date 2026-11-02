@@ -70,18 +70,17 @@ th { border-top: 0; color: var(--muted); font-size: 13px; }
 <div class="demo"><div class="wrap"><span>시연 화면입니다. 사람과 현장, 기록은 모두 예시이며 실제 데이터가 아닙니다.</span><button id="reset">시연 초기화</button></div></div>
 <header><div class="wrap">
   <div><h1>현장 안전 관리자</h1><span class="site">가나건설 다라 신축 현장 (예시)</span></div>
-  <div class="head-actions"><a class="btn alt" href="./" target="_blank">노동자 앱 열기</a><button class="btn" id="csv">오늘 기록 내려받기</button></div>
+  <div class="head-actions"><a class="btn alt" href="./" target="_blank">노동자 앱 열기</a><button class="btn" id="csv">오늘 전달 기록 내려받기</button></div>
 </div></header>
 <main><div class="wrap">
   <div class="kpis" id="kpis"></div>
   <div class="cols">
     <div class="stack">
-      <section><h2>처리할 멈춤·신고</h2><p class="hint">노동자가 모국어로 보낸 내용이 한국어로 표시됩니다.</p><div id="events"></div></section>
       <section><h2>오늘의 위험 공지</h2><p class="hint">검수된 문장을 고르면 노동자 언어로 나갑니다.</p><div id="presets"></div><button class="btn" id="send">노동자에게 보내기</button><p class="sent" id="sent" role="status"></p></section>
     </div>
     <div class="stack">
-      <section><h2>언어별 오늘 위험 확인</h2><div class="bars" id="bars"></div></section>
-      <section><h2>작업자 현황</h2><div class="table"><table><thead><tr><th>작업자</th><th>언어</th><th>오늘 작업</th><th>위험 확인</th><th>영상</th></tr></thead><tbody id="rows"></tbody></table></div></section>
+      <section><h2>언어별 오늘 안내 전달</h2><div class="bars" id="bars"></div></section>
+      <section><h2>작업자 현황</h2><div class="table"><table><thead><tr><th>작업자</th><th>언어</th><th>오늘 작업</th><th>오늘 안내</th><th>영상</th></tr></thead><tbody id="rows"></tbody></table></div></section>
     </div>
   </div>
 </div></main>
@@ -93,14 +92,6 @@ const PRESETS = {
   crane: { go: "carry", icon: "crane", ko: "오후 크레인 인양 작업, 아래로 지나가지 마세요", zh: "下午吊车吊装作业，请勿从下方经过。", vi: "Chiều nay có cẩu hàng, không đi bên dưới.", th: "บ่ายนี้มีงานเครนยกของ ห้ามเดินผ่านด้านล่าง", ru: "Днём работает кран, не проходите под грузом." },
   manhole: { go: "confined", icon: "gas", ko: "지하 맨홀 작업, 측정 전 출입 금지", zh: "地下检查井作业，测量前禁止进入。", vi: "Làm việc ở hố ga, cấm vào trước khi đo khí.", th: "งานบ่อพักใต้ดิน ห้ามเข้าก่อนวัดก๊าซ", ru: "Работа в колодце, вход запрещён до замера газов." },
   digger: { go: "excavate", icon: "dig", ko: "굴착기 작업 구역, 신호수 지시를 따르세요", zh: "挖掘机作业区，请听从信号员指挥。", vi: "Khu vực máy xúc, hãy làm theo người xi-nhan.", th: "พื้นที่รถขุด ให้ทำตามคนให้สัญญาณ", ru: "Зона работы экскаватора, выполняйте указания сигнальщика." }
-};
-const REPORTS = {
-  guard: { icon: "guard", ko: "난간이 없어요", zh: "没有栏杆", vi: "Không có lan can", th: "ไม่มีราวกันตก", ru: "Нет ограждения" },
-  cover: { icon: "hole", ko: "덮개가 열려 있어요", zh: "盖板开着", vi: "Nắp che đang mở", th: "ฝาปิดเปิดอยู่", ru: "Щит открыт" },
-  cable: { icon: "cable", ko: "전선이 위험해요", zh: "电线危险", vi: "Dây điện nguy hiểm", th: "สายไฟอันตราย", ru: "Опасный провод" },
-  fire: { icon: "flame", ko: "불이나 연기가 있어요", zh: "有火或烟", vi: "Có lửa hoặc khói", th: "มีไฟหรือควัน", ru: "Огонь или дым" },
-  machine: { icon: "truck", ko: "장비가 위험해요", zh: "设备危险", vi: "Thiết bị nguy hiểm", th: "เครื่องจักรอันตราย", ru: "Опасная техника" },
-  soil: { icon: "dig", ko: "흙이 무너질 것 같아요", zh: "土方可能坍塌", vi: "Đất có thể sụp", th: "ดินอาจถล่ม", ru: "Грунт может обрушиться" }
 };
 const TASKNAME = { gear: "보호구 착용", opening: "개구부 주변 작업", scaffold: "비계 위 작업", ladder: "사다리 작업", hot: "용접·절단 작업", electric: "전기·양수기 작업", excavate: "땅파기 주변 작업", confined: "맨홀·밀폐공간 작업", signal: "장비 신호수", carry: "자재 운반", concrete: "콘크리트 타설 보조", clean: "현장 정리·청소" };
 const DEMO = {
@@ -123,17 +114,6 @@ const SEED = [
   ["솜○○", "th", "carry", 1, 1],
   ["알렉○○", "ru", "excavate", 0, 1]
 ].map(r => ({ name: r[0], lang: r[1], task: r[2], ok: !!r[3], video: !!r[4] }));
-const SEED_EVENTS = [
-  { id: "s1", kind: "stop", lang: "zh", task: "hot", item: "화재감시자가 있나요?", who: "왕○○", min: 12, status: "확인 중" },
-  { id: "s2", kind: "report", lang: "vi", item: "덮개가 열려 있어요", who: "응우옌○○", min: 34, status: "접수" },
-  { id: "s3", kind: "report", lang: "ru", item: "난간이 없어요", who: "알렉○○", min: 95, status: "조치 완료" }
-];
-function allEvents() {
-  const statuses = DEMO.read("demo-seed-status", {});
-  const live = DEMO.events().filter(e => e.type === "stop" || e.type === "report").map(e => ({ id: e.id, kind: e.type, lang: e.lang, task: e.task, item: e.item, who: "시연 폰", at: e.at, status: statuses[e.id] || e.status, live: true }));
-  const seed = SEED_EVENTS.map(e => ({ ...e, status: statuses[e.id] || e.status }));
-  return [...live, ...seed];
-}
 function liveWorker() {
   const ev = DEMO.events();
   if (!ev.length) return null;
@@ -142,50 +122,35 @@ function liveWorker() {
   return { name: "시연 폰", lang: last.lang, task, ok: ev.some(e => e.type === "confirm"), video: ev.some(e => e.type === "done"), live: true };
 }
 function workers() { const l = liveWorker(); return l ? [l, ...SEED] : SEED; }
-function timeText(e) {
-  if (e.at) return new Date(e.at).toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" });
-  return e.min + "분 전";
-}
 function render() {
-  const w = workers(), ev = allEvents();
-  const okN = w.filter(x => x.ok).length, open = ev.filter(e => e.status !== "조치 완료").length, stops = ev.filter(e => e.kind === "stop").length;
+  const w = workers(), okN = w.filter(x => x.ok).length, vidN = w.filter(x => x.video).length, miss = w.length - okN;
   document.getElementById("kpis").innerHTML =
     `<div class="kpi"><span>오늘 앱 사용 작업자</span><strong>${w.length}</strong><small>명</small></div>
-     <div class="kpi"><span>오늘 위험 확인</span><strong>${Math.round(okN / w.length * 100)}%</strong><small>${okN}/${w.length}명</small></div>
-     <div class="kpi ${stops ? "alert" : ""}"><span>작업 전 "아니요"</span><strong>${stops}</strong><small>건</small></div>
-     <div class="kpi ${open ? "alert" : ""}"><span>처리 안 된 건</span><strong>${open}</strong><small>건</small></div>`;
-  document.getElementById("events").innerHTML = ev.length ? ev.map(e => `<div class="ev ${e.status === "조치 완료" ? "done" : ""}">
-      <div><span class="tag ${e.kind}">${e.kind === "stop" ? "작업 멈춤" : "위험 신고"}</span><strong>${e.kind === "stop" ? `${TASKNAME[e.task] || ""}: ${e.item} → 아니요` : e.item}</strong>
-      <small>${e.who} · ${LANGNAME[e.lang] || ""} · ${timeText(e)}</small></div>
-      <select id="st-${e.id}" data-ev="${e.id}" aria-label="처리 상태">${["접수", "확인 중", "조치 완료"].map(s => `<option ${s === e.status ? "selected" : ""}>${s}</option>`).join("")}</select></div>`).join("") : `<p class="empty">처리할 건이 없습니다.</p>`;
+     <div class="kpi"><span>오늘 안내 전달</span><strong>${Math.round(okN / w.length * 100)}%</strong><small>${okN}/${w.length}명</small></div>
+     <div class="kpi ${miss ? "alert" : ""}"><span>아직 못 본 작업자</span><strong>${miss}</strong><small>명, 작업 전 직접 안내</small></div>
+     <div class="kpi"><span>작업 영상 시청</span><strong>${Math.round(vidN / w.length * 100)}%</strong><small>${vidN}/${w.length}명</small></div>`;
   const active = DEMO.hazards();
   document.getElementById("presets").innerHTML = Object.entries(PRESETS).map(([k, p]) => `<label class="preset"><input type="checkbox" id="pr-${k}" value="${k}" ${active.includes(k) ? "checked" : ""}><span>${p.ko}<small lang="zh">${p.zh}</small></span></label>`).join("");
   document.getElementById("bars").innerHTML = Object.keys(LANGNAME).map(l => {
     const a = w.filter(x => x.lang === l), n = a.filter(x => x.ok).length, pct = a.length ? n / a.length * 100 : 0;
     return `<div class="bar"><span>${LANGNAME[l]}</span><i><b style="width:${pct}%"></b></i><span>${n}/${a.length}명</span></div>`;
   }).join("");
-  document.getElementById("rows").innerHTML = w.map(x => `<tr class="${x.live ? "new" : ""}"><td>${x.name}</td><td>${LANGNAME[x.lang] || "-"}</td><td>${TASKNAME[x.task] || "-"}</td><td class="state ${x.ok ? "yes" : "no"}">${x.ok ? "확인" : "미확인"}</td><td class="state ${x.video ? "yes" : "no"}">${x.video ? "시청" : "미시청"}</td></tr>`).join("");
+  document.getElementById("rows").innerHTML = w.map(x => `<tr class="${x.live ? "new" : ""}"><td>${x.name}</td><td>${LANGNAME[x.lang] || "-"}</td><td>${TASKNAME[x.task] || "-"}</td><td class="state ${x.ok ? "yes" : "no"}">${x.ok ? "전달" : "미전달"}</td><td class="state ${x.video ? "yes" : "no"}">${x.video ? "시청" : "미시청"}</td></tr>`).join("");
 }
-document.addEventListener("change", e => {
-  const id = e.target.dataset.ev;
-  if (!id) return;
-  const s = DEMO.read("demo-seed-status", {}); s[id] = e.target.value; DEMO.write("demo-seed-status", s); render();
-});
 document.getElementById("send").addEventListener("click", () => {
   const picked = [...document.querySelectorAll("#presets input:checked")].map(i => i.value);
   DEMO.write("demo-hazards", picked);
   document.getElementById("sent").textContent = `${picked.length}개 공지를 보냈습니다. 노동자 앱에 바로 표시됩니다.`;
 });
 document.getElementById("reset").addEventListener("click", () => {
-  ["demo-events", "demo-hazards", "demo-seed-status"].forEach(k => { try { localStorage.removeItem(k); } catch (e) {} });
+  ["demo-events", "demo-hazards"].forEach(k => { try { localStorage.removeItem(k); } catch (e) {} });
   document.getElementById("sent").textContent = "";
   render();
 });
 document.getElementById("csv").addEventListener("click", () => {
   const q = v => `"${String(v ?? "").replace(/"/g, '""')}"`;
-  const lines = [["구분", "작업자", "언어", "내용", "상태", "시각"].map(q).join(",")];
-  allEvents().forEach(e => lines.push([e.kind === "stop" ? "작업 멈춤" : "위험 신고", e.who, LANGNAME[e.lang], (e.task ? TASKNAME[e.task] + ": " : "") + e.item, e.status, timeText(e)].map(q).join(",")));
-  workers().forEach(x => lines.push(["작업자 현황", x.name, LANGNAME[x.lang], TASKNAME[x.task], x.ok ? "위험 확인" : "미확인", x.video ? "영상 시청" : "미시청"].map(q).join(",")));
+  const lines = [["오늘 공지", DEMO.hazards().map(k => PRESETS[k].ko).join(" / ")].map(q).join(","), ["작업자", "언어", "오늘 작업", "오늘 안내", "영상"].map(q).join(",")];
+  workers().forEach(x => lines.push([x.name, LANGNAME[x.lang], TASKNAME[x.task], x.ok ? "전달" : "미전달", x.video ? "시청" : "미시청"].map(q).join(",")));
   const a = document.createElement("a");
   a.href = URL.createObjectURL(new Blob(["﻿" + lines.join("\n")], { type: "text/csv;charset=utf-8" }));
   a.download = "site-safety-demo.csv"; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);

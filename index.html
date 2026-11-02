@@ -91,7 +91,7 @@ html:not(:lang(ko)) .hero h1 { font-family: var(--font); font-weight: 800; font-
 .overlay { position: fixed; inset: 0; z-index: 30; padding: 24px max(24px, env(safe-area-inset-right, 0px)) 24px max(24px, env(safe-area-inset-left, 0px)); background: var(--stage); color: var(--on); display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 24px; text-align: center; }
 .overlay p { margin: 0; font-size: clamp(38px, 11vw, 64px); line-height: 1.2; font-weight: 800; }
 .overlay button { min-height: 56px; padding: 0 28px; border-radius: 28px; background: var(--on); color: var(--ink); font-weight: 800; }
-.tabs { position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); background: var(--surface); border-top: 1px solid #EFD9BC; padding-bottom: env(safe-area-inset-bottom, 0px); padding-left: env(safe-area-inset-left, 0px); padding-right: env(safe-area-inset-right, 0px); }
+.tabs { position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); background: var(--surface); border-top: 1px solid #EFD9BC; padding-bottom: env(safe-area-inset-bottom, 0px); padding-left: env(safe-area-inset-left, 0px); padding-right: env(safe-area-inset-right, 0px); }
 .tabs button { min-height: 68px; padding: 4px; font-size: 15px; line-height: 1.2; text-align: center; color: var(--muted); font-weight: 700; }
 .tabs button.on { color: var(--blue); font-weight: 800; box-shadow: inset 0 3px 0 var(--blue); }
 .langs { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
@@ -124,6 +124,9 @@ body.stop { background: #A8200F; color: var(--on); }
 .rep .tile { min-height: 150px; }
 .mine { display: flex; justify-content: space-between; gap: 10px; padding-top: 6px; border-top: 1px solid #EFD9BC; }
 .mine b { color: var(--blue); white-space: nowrap; }
+.sec { margin: 6px 0 -4px; font-size: 22px; font-weight: 800; }
+.hz-t { color: var(--no); font-size: 18px; font-weight: 800; }
+.hz-line { margin: 0; font-size: 18px; font-weight: 700; }
 @keyframes pop { from { transform: scale(.85); opacity: .3; } to { transform: scale(1); opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .art { animation: none; } }
 </style>
@@ -294,14 +297,6 @@ const PRESETS = {
   manhole: { go: "confined", icon: "gas", ko: "지하 맨홀 작업, 측정 전 출입 금지", zh: "地下检查井作业，测量前禁止进入。", vi: "Làm việc ở hố ga, cấm vào trước khi đo khí.", th: "งานบ่อพักใต้ดิน ห้ามเข้าก่อนวัดก๊าซ", ru: "Работа в колодце, вход запрещён до замера газов." },
   digger: { go: "excavate", icon: "dig", ko: "굴착기 작업 구역, 신호수 지시를 따르세요", zh: "挖掘机作业区，请听从信号员指挥。", vi: "Khu vực máy xúc, hãy làm theo người xi-nhan.", th: "พื้นที่รถขุด ให้ทำตามคนให้สัญญาณ", ru: "Зона работы экскаватора, выполняйте указания сигнальщика." }
 };
-const REPORTS = {
-  guard: { icon: "guard", ko: "난간이 없어요", zh: "没有栏杆", vi: "Không có lan can", th: "ไม่มีราวกันตก", ru: "Нет ограждения" },
-  cover: { icon: "hole", ko: "덮개가 열려 있어요", zh: "盖板开着", vi: "Nắp che đang mở", th: "ฝาปิดเปิดอยู่", ru: "Щит открыт" },
-  cable: { icon: "cable", ko: "전선이 위험해요", zh: "电线危险", vi: "Dây điện nguy hiểm", th: "สายไฟอันตราย", ru: "Опасный провод" },
-  fire: { icon: "flame", ko: "불이나 연기가 있어요", zh: "有火或烟", vi: "Có lửa hoặc khói", th: "มีไฟหรือควัน", ru: "Огонь или дым" },
-  machine: { icon: "truck", ko: "장비가 위험해요", zh: "设备危险", vi: "Thiết bị nguy hiểm", th: "เครื่องจักรอันตราย", ru: "Опасная техника" },
-  soil: { icon: "dig", ko: "흙이 무너질 것 같아요", zh: "土方可能坍塌", vi: "Đất có thể sụp", th: "ดินอาจถล่ม", ru: "Грунт может обрушиться" }
-};
 const TASKNAME = { gear: "보호구 착용", opening: "개구부 주변 작업", scaffold: "비계 위 작업", ladder: "사다리 작업", hot: "용접·절단 작업", electric: "전기·양수기 작업", excavate: "땅파기 주변 작업", confined: "맨홀·밀폐공간 작업", signal: "장비 신호수", carry: "자재 운반", concrete: "콘크리트 타설 보조", clean: "현장 정리·청소" };
 const DEMO = {
   read(k, d) { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch (e) { return d; } },
@@ -377,16 +372,6 @@ Object.assign(I18N.ru, {
   excavate: ["Работа у котлована", "Крепление стенок, рядом с экскаватором", ["Перед входом осмотрите крепление и склоны.", "Входите и выходите по отведённой лестнице или проходу.", "Оставайтесь вне зоны работы экскаватора.", "Двигайтесь только после сигнала сигнальщика."], ["Не складывайте грунт и материалы у края котлована.", "При трещинах или осыпании грунта сразу выйдите и сообщите.", "Не заходите в зону работы техники."]],
   confined: ["Колодцы и замкнутые пространства", "Колодцы, ёмкости, подземные помещения", ["Убедитесь, что есть разрешение на работу.", "Перед входом измерьте кислород и вредные газы.", "Постоянно проветривайте во время работы.", "Оставьте снаружи наблюдателя и держите связь."], ["Не входите без замера газов.", "Не спускайтесь спасать упавшего коллегу. Сразу звоните 119.", "При головокружении или одышке сразу выйдите."]]
 });
-const CHECKS = {
-  opening: { ko: ["난간이나 덮개가 있나요?", "덮개를 열 때 승인을 받았나요?", "안전대를 걸 곳이 있나요?"], zh: ["有栏杆或盖板吗？", "打开盖板已获批准吗？", "有挂安全带的地方吗？"], vi: ["Có lan can hoặc nắp che không?", "Đã được phép mở nắp chưa?", "Có chỗ móc dây an toàn không?"], th: ["มีราวกันตกหรือฝาปิดไหม?", "ได้รับอนุญาตให้เปิดฝาแล้วหรือยัง?", "มีจุดเกี่ยวเข็มขัดนิรภัยไหม?"], ru: ["Есть ограждение или щит?", "Есть разрешение открыть щит?", "Есть куда пристегнуть привязь?"] },
-  scaffold: { ko: ["발판과 난간이 다 있나요?", "안전대를 찼나요?", "승강 통로가 있나요?"], zh: ["踏板和栏杆都有吗？", "系好安全带了吗？", "有上下通道吗？"], vi: ["Sàn thao tác và lan can có đủ không?", "Đã đeo dây an toàn chưa?", "Có lối lên xuống không?"], th: ["แผ่นพื้นและราวกันตกครบไหม?", "สวมเข็มขัดนิรภัยแล้วหรือยัง?", "มีทางขึ้นลงไหม?"], ru: ["Настил и ограждения на месте?", "Привязь надета?", "Есть проход для подъёма?"] },
-  ladder: { ko: ["사다리가 부러진 곳 없이 튼튼한가요?", "바닥이 평평하고 고정했나요?", "잡아 줄 동료가 있나요?"], zh: ["梯子完好牢固吗？", "地面平整并已固定吗？", "有同事帮忙扶梯吗？"], vi: ["Thang có chắc chắn, không hỏng không?", "Nền phẳng và đã cố định chưa?", "Có đồng nghiệp giữ thang không?"], th: ["บันไดแข็งแรงไม่หักใช่ไหม?", "พื้นเรียบและยึดแล้วหรือยัง?", "มีเพื่อนช่วยจับบันไดไหม?"], ru: ["Лестница цела и прочна?", "Основание ровное, лестница закреплена?", "Есть коллега, который её держит?"] },
-  hot: { ko: ["작업 허가를 받았나요?", "화재감시자가 있나요?", "소화기와 불티 방지포가 있나요?"], zh: ["已取得作业许可吗？", "有火灾监护人吗？", "有灭火器和防火布吗？"], vi: ["Đã có giấy phép làm việc chưa?", "Có người giám sát cháy không?", "Có bình chữa cháy và tấm chống tia lửa không?"], th: ["ได้รับใบอนุญาตทำงานแล้วหรือยัง?", "มีผู้เฝ้าระวังไฟไหม?", "มีถังดับเพลิงและผ้ากันสะเก็ดไฟไหม?"], ru: ["Есть разрешение на работу?", "Есть наблюдатель за огнём?", "Есть огнетушитель и защита от искр?"] },
-  electric: { ko: ["전원을 껐나요?", "차단기에 잠금과 표지를 걸었나요?", "주변에 물이 없나요?"], zh: ["已切断电源吗？", "断路器上挂锁和标牌了吗？", "周围没有积水吗？"], vi: ["Đã tắt nguồn chưa?", "Đã khóa cầu dao và treo biển chưa?", "Xung quanh không có nước đúng không?"], th: ["ปิดไฟแล้วหรือยัง?", "ล็อกเบรกเกอร์และแขวนป้ายแล้วหรือยัง?", "รอบ ๆ ไม่มีน้ำใช่ไหม?"], ru: ["Питание отключено?", "Автомат заблокирован, табличка висит?", "Рядом нет воды?"] },
-  excavate: { ko: ["흙막이나 경사면에 금이 없나요?", "드나드는 통로가 있나요?", "신호수가 있나요?"], zh: ["支护和边坡没有裂缝吗？", "有进出通道吗？", "有信号员吗？"], vi: ["Tường chắn và mái dốc không có vết nứt đúng không?", "Có lối ra vào không?", "Có người xi-nhan không?"], th: ["กำแพงกันดินและลาดดินไม่มีรอยแตกใช่ไหม?", "มีทางเข้าออกไหม?", "มีคนให้สัญญาณไหม?"], ru: ["На креплении и склонах нет трещин?", "Есть проход для входа и выхода?", "Есть сигнальщик?"] },
-  confined: { ko: ["산소와 가스를 측정했나요?", "환기를 하고 있나요?", "밖에 감시인이 있나요?"], zh: ["已测量氧气和气体吗？", "正在通风吗？", "外面有监护人吗？"], vi: ["Đã đo oxy và khí chưa?", "Có đang thông gió không?", "Bên ngoài có người giám sát không?"], th: ["วัดออกซิเจนและก๊าซแล้วหรือยัง?", "กำลังระบายอากาศอยู่ไหม?", "มีผู้เฝ้าระวังอยู่ข้างนอกไหม?"], ru: ["Кислород и газы измерены?", "Идёт проветривание?", "Снаружи есть наблюдатель?"] },
-  signal: { ko: ["기사와 신호를 맞췄나요?", "기사가 나를 볼 수 있나요?", "주변 사람을 막았나요?"], zh: ["和司机约定信号了吗？", "司机能看到您吗？", "已阻止周围人员进入吗？"], vi: ["Đã thống nhất tín hiệu với tài xế chưa?", "Tài xế có nhìn thấy bạn không?", "Đã chặn người xung quanh chưa?"], th: ["ตกลงสัญญาณกับคนขับแล้วหรือยัง?", "คนขับมองเห็นคุณไหม?", "กันคนรอบ ๆ แล้วหรือยัง?"], ru: ["Сигналы с водителем согласованы?", "Водитель вас видит?", "Людей рядом не пускаете?"] }
-};
 const UI3 = {
   ko: { today: "오늘 우리 현장 위험", sample: "예시 현장", h1: "3층 개구부 작업", h2: "오후 2시 지하 용접 작업", ok: "확인했어요", done: "오늘 위험을 확인했어요", checkT: "시작 전에 확인하세요", yes: "예", no: "아니요", stopT: "작업을 멈추세요", stopB: "시작하지 말고 관리자에게 바로 알리세요. 안전해진 뒤에 시작하세요.", watch: "영상만 보기", other: "다른 작업 고르기" },
   zh: { today: "今天本现场的危险", sample: "示例现场", h1: "3楼洞口作业", h2: "下午2点地下焊接作业", ok: "我已确认", done: "已确认今天的危险", checkT: "开始前请确认", yes: "是", no: "否", stopT: "请停止作业", stopB: "不要开始，请马上告诉管理人员。确认安全后再开始。", watch: "只看视频", other: "选择其他工作" },
@@ -447,12 +432,13 @@ function fmt(s) { s = Math.floor(s); return `${Math.floor(s / 60)}:${String(s % 
 function page(cls) { document.body.className = cls; window.scrollTo(0, 0); }
 function showTabs(active) {
   tabs.hidden = false;
-  tabs.innerHTML = `<button class="${active === "v" ? "on" : ""}" data-go="">${u2().tabV}</button><button class="${active === "r" ? "on" : ""}" data-go="report">${UI4[lang].tab}</button><button class="${active === "t" ? "on" : ""}" data-go="talk">${u2().tabT}</button>`;
+  tabs.innerHTML = `<button class="${active === "v" ? "on" : ""}" data-go="">${u2().tabV}</button><button class="${active === "t" ? "on" : ""}" data-go="talk">${u2().tabT}</button>`;
 }
 function note() { return `<div class="note"><p><strong>${u().n1}</strong> ${u().n1b}</p><p>${u().n2}</p><p>${u().n3}</p></div>`; }
 function langBtn() { return `<button class="langbtn" data-picker>${LANGS.find(l => l.id === lang).name}</button>`; }
 function home() {
   stop(); cur = null; page("home"); showTabs("v");
+  if (!saved(hazardKey())) { keep(hazardKey(), "1"); DEMO.add({ type: "confirm", lang }); }
   const seen = store.get();
   app.innerHTML = `<div class="hero">${langBtn()}<h1>${HELLO[lang]}</h1><p>${u().head}</p></div>
     ${hazardCard()}
@@ -464,42 +450,7 @@ function hazardCard() {
   if (!list.length) return "";
   return `<section class="hazard"><div class="hz-top"><strong>${x.today}</strong><small>${x.sample}</small></div>
     ${list.map(k => `<button class="hz" data-go="${PRESETS[k].go}"><span class="hz-ic">${svg(PRESETS[k].icon)}</span><span>${PRESETS[k][lang]}</span></button>`).join("")}
-    ${saved(hazardKey()) ? `<p class="hz-done">✓ ${x.done}</p>` : `<button class="hz-ok" data-confirm>${x.ok}</button>`}</section>`;
-}
-const UI4 = {
-  ko: { tab: "위험 신고", title: "위험을 봤나요?", hint: "누르면 관리자에게 바로 전달됩니다.", sent: "관리자에게 보냈어요", mine: "내 신고", more: "다른 위험 신고", demo: "시연 화면: 같은 기기의 관리자 화면에만 전달됩니다." },
-  zh: { tab: "危险报告", title: "看到危险了吗？", hint: "点击后立即发送给管理人员。", sent: "已发送给管理人员", mine: "我的报告", more: "报告其他危险", demo: "演示画面：仅发送到同一设备的管理页面。" },
-  vi: { tab: "Báo nguy hiểm", title: "Bạn thấy nguy hiểm?", hint: "Chạm để gửi ngay cho người quản lý.", sent: "Đã gửi cho người quản lý", mine: "Báo cáo của tôi", more: "Báo nguy hiểm khác", demo: "Màn hình thử: chỉ gửi đến trang quản lý trên cùng thiết bị." },
-  th: { tab: "แจ้งอันตราย", title: "เห็นอันตรายไหม?", hint: "แตะเพื่อส่งถึงผู้ดูแลทันที", sent: "ส่งถึงผู้ดูแลแล้ว", mine: "รายงานของฉัน", more: "แจ้งอันตรายอื่น", demo: "หน้าสาธิต: ส่งถึงหน้าผู้ดูแลในอุปกรณ์เดียวกันเท่านั้น" },
-  ru: { tab: "Сообщить", title: "Видите опасность?", hint: "Нажмите, и руководитель сразу получит сообщение.", sent: "Отправлено руководителю", mine: "Мои сообщения", more: "Сообщить о другой опасности", demo: "Демо: отправка только на страницу руководителя на этом устройстве." }
-};
-const STATUS = { ko: { "접수": "접수", "확인 중": "확인 중", "조치 완료": "조치 완료" }, zh: { "접수": "已接收", "확인 중": "确认中", "조치 완료": "已处理" }, vi: { "접수": "Đã nhận", "확인 중": "Đang kiểm tra", "조치 완료": "Đã xử lý" }, th: { "접수": "รับเรื่องแล้ว", "확인 중": "กำลังตรวจสอบ", "조치 완료": "แก้ไขแล้ว" }, ru: { "접수": "Получено", "확인 중": "Проверяется", "조치 완료": "Устранено" } };
-function reportView(sent) {
-  stop(); cur = null; page("work"); showTabs("r");
-  const x = UI4[lang], st = DEMO.read("demo-seed-status", {});
-  const mine = DEMO.events().filter(e => e.type === "report").slice(0, 5);
-  app.innerHTML = `<div class="top"><h1>${x.title}</h1>${langBtn()}</div>
-    ${sent ? `<p class="hz-done" role="status">✓ ${x.sent}</p>` : `<p class="hint">${x.hint}</p>`}
-    <div class="tiles rep">${Object.entries(REPORTS).map(([k, r]) => `<button class="tile" data-report="${k}">${svg(r.icon)}<span>${r[lang]}</span></button>`).join("")}</div>
-    ${mine.length ? `<section class="hazard"><strong>${x.mine}</strong>${mine.map(e => `<div class="mine"><span>${REPORTS[e.key][lang]}</span><b>${STATUS[lang][st[e.id] || e.status]}</b></div>`).join("")}</section>` : ""}
-    <p class="hint">${x.demo}</p>`;
-}
-let answers = [], skipGate = false;
-function checkView(task) {
-  stop(); cur = null; page("work"); showTabs("v");
-  const x = UI3[lang], q = CHECKS[task.id][lang];
-  app.innerHTML = `<div class="top"><button class="back" data-go="">${u().back}</button>${langBtn()}</div>
-    <h1>${task.lname}</h1><p class="hint">${x.checkT}</p>
-    <div class="checks">${q.map((s, i) => `<div class="check"><strong>${s}</strong><div class="yn"><button class="y ${answers[i] ? "on" : ""}" data-chk="${i}" data-v="y" aria-pressed="${!!answers[i]}">○ ${x.yes}</button><button class="n" data-chk="${i}" data-v="n">✕ ${x.no}</button></div></div>`).join("")}</div>
-    <button class="watch" data-watch>${x.watch}</button>`;
-}
-function stopView(task) {
-  page("stop"); tabs.hidden = true; hush();
-  const x = UI3[lang];
-  app.innerHTML = `<div class="stopbox"><svg viewBox="0 0 64 64" aria-hidden="true"><path d="M21 4h22l17 17v22L43 60H21L4 43V21z" fill="currentColor"/><path d="M20 32h24" stroke="#A8200F" stroke-width="8" stroke-linecap="round"/></svg>
-    <h1>${x.stopT}</h1><p>${x.stopB}</p>
-    <button class="watch" data-watch>${x.watch}</button><button class="watch" data-go="">${x.other}</button></div>`;
-  speak(x.stopT, lang);
+    </section>`;
 }
 function picker() {
   stop(); cur = null; page("home"); tabs.hidden = true;
@@ -509,16 +460,25 @@ function picker() {
 function chipRow(label, kind, active, withOff) {
   return `<span>${label}</span><span class="chips">${Object.keys(SUBNAMES).map(k => `<button class="chip ${active === k ? "on" : ""}" data-${kind}="${k}" lang="${k}" aria-pressed="${active === k}">${SUBNAMES[k]}</button>`).join("")}${withOff ? `<button class="chip ${active === "off" ? "on" : ""}" data-${kind}="off" aria-pressed="${active === "off"}">${u2().off}</button>` : ""}</span>`;
 }
+function cardHtml(s, i) {
+  return `<button class="card ${s.warn ? "warn" : ""}" data-scene="${i}"><span class="pic">${svg(s.icon)}${s.no ? NO : ""}</span><span class="mark">${s.warn ? (s.no ? "✕" : "!") : "○"}</span><span>${s.cap}</span></button>`;
+}
+function todayFor(task) {
+  const list = DEMO.hazards().filter(k => PRESETS[k] && PRESETS[k].go === task.id);
+  return list.length ? `<section class="hazard"><strong class="hz-t">${UI3[lang].today}</strong>${list.map(k => `<p class="hz-line">${PRESETS[k][lang]}</p>`).join("")}</section>` : "";
+}
 function detail(task) {
   stop(); cur = task; t = 0; shown = -1; page("work"); showTabs("v");
   app.innerHTML = `<div class="top"><button class="back" data-go="">${u().back}</button>${langBtn()}</div>
     <h1>${task.lname}</h1>
+    ${todayFor(task)}
     <div class="player"><div class="screen" id="screen"></div>
       <div class="controls"><button class="pp" id="pp" aria-label="${u().play}"></button>
         <div class="segs">${task.scenes.map((s, i) => `<button class="seg ${s.warn ? "warn" : ""}" data-scene="${i}" aria-label="${s.label}"><i><b></b></i></button>`).join("")}</div>
         <span class="time" id="time"></span></div></div>
     <div class="media" id="media"></div>
-    <div class="cards">${task.scenes.map((s, i) => `<button class="card ${s.warn ? "warn" : ""}" data-scene="${i}"><span class="pic">${svg(s.icon)}${s.no ? NO : ""}</span><span class="mark">${s.warn ? (s.no ? "✕" : "!") : "○"}</span><span>${s.cap}</span></button>`).join("")}</div>
+    <h2 class="sec">${u().careful}</h2><div class="cards">${task.scenes.map((s, i) => ({ s, i })).filter(x => x.s.warn).map(({ s, i }) => cardHtml(s, i)).join("")}</div>
+    <h2 class="sec">${u().doit}</h2><div class="cards">${task.scenes.map((s, i) => ({ s, i })).filter(x => !x.s.warn).map(({ s, i }) => cardHtml(s, i)).join("")}</div>
     ${note()}`;
   drawMedia(); draw();
   if (wantPlay) play();
@@ -573,18 +533,8 @@ document.addEventListener("click", e => {
   if (c("#closeover")) { overlay.hidden = true; hush(); return; }
   if ((el = c("[data-lang]"))) { lang = el.dataset.lang; langStore.set(lang); subLang = null; subStore.set(null); soundLang = null; keep("sound", null); target = null; keep("target", null); route(); return; }
   if (c("[data-picker]")) { picker(); return; }
-  if (c("[data-confirm]")) { keep(hazardKey(), "1"); DEMO.add({ type: "confirm", lang }); home(); return; }
-  if ((el = c("[data-report]"))) { DEMO.add({ type: "report", key: el.dataset.report, item: REPORTS[el.dataset.report].ko, lang }); reportView(true); window.scrollTo(0, 0); return; }
-  if ((el = c("[data-chk]"))) {
-    const task = TASKS.find(x => x.id === location.hash.slice(1));
-    if (el.dataset.v === "n") { DEMO.add({ type: "stop", task: task.id, item: CHECKS[task.id].ko[+el.dataset.chk], lang }); stopView(task); return; }
-    answers[+el.dataset.chk] = true;
-    if (CHECKS[task.id][lang].every((_, i) => answers[i])) { skipGate = true; wantPlay = true; route(); return; }
-    checkView(task); return;
-  }
-  if (c("[data-watch]")) { skipGate = true; wantPlay = true; route(); return; }
   if ((el = c("[data-go]"))) {
-    wantPlay = !!el.dataset.go && el.dataset.go !== "talk" && el.dataset.go !== "report";
+    wantPlay = !!el.dataset.go && el.dataset.go !== "talk";
     if (location.hash.slice(1) === el.dataset.go) route(); else location.hash = el.dataset.go;
     return;
   }
@@ -620,17 +570,13 @@ function route() {
   localize();
   const h = location.hash.slice(1);
   if (h === "talk") { talk(); return; }
-  if (h === "report") { reportView(false); return; }
   const task = TASKS.find(x => x.id === h);
-  if (task && CHECKS[task.id] && wantPlay && !skipGate) { answers = []; wantPlay = false; checkView(task); return; }
-  skipGate = false;
   task ? detail(task) : home();
 }
 addEventListener("hashchange", route);
 addEventListener("storage", e => {
   const h = location.hash.slice(1);
   if (e.key === "demo-hazards" && !h) home();
-  if (e.key === "demo-seed-status" && h === "report") reportView(false);
 });
 route();
 </script>
