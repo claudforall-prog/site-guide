@@ -91,8 +91,8 @@ html:not(:lang(ko)) .hero h1 { font-family: var(--font); font-weight: 800; font-
 .overlay { position: fixed; inset: 0; z-index: 30; padding: 24px max(24px, env(safe-area-inset-right, 0px)) 24px max(24px, env(safe-area-inset-left, 0px)); background: var(--stage); color: var(--on); display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 24px; text-align: center; }
 .overlay p { margin: 0; font-size: clamp(38px, 11vw, 64px); line-height: 1.2; font-weight: 800; }
 .overlay button { min-height: 56px; padding: 0 28px; border-radius: 28px; background: var(--on); color: var(--ink); font-weight: 800; }
-.tabs { position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); background: var(--surface); border-top: 1px solid #EFD9BC; padding-bottom: env(safe-area-inset-bottom, 0px); padding-left: env(safe-area-inset-left, 0px); padding-right: env(safe-area-inset-right, 0px); }
-.tabs button { min-height: 68px; text-align: center; color: var(--muted); font-weight: 700; }
+.tabs { position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); background: var(--surface); border-top: 1px solid #EFD9BC; padding-bottom: env(safe-area-inset-bottom, 0px); padding-left: env(safe-area-inset-left, 0px); padding-right: env(safe-area-inset-right, 0px); }
+.tabs button { min-height: 68px; padding: 4px; font-size: 15px; line-height: 1.2; text-align: center; color: var(--muted); font-weight: 700; }
 .tabs button.on { color: var(--blue); font-weight: 800; box-shadow: inset 0 3px 0 var(--blue); }
 .langs { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
 .lang { width: 100%; min-height: 72px; padding: 10px 18px; border-radius: 24px; background: var(--surface); color: var(--ink); display: flex; justify-content: space-between; align-items: center; gap: 12px; }
@@ -121,6 +121,9 @@ body.stop { background: #A8200F; color: var(--on); }
 .stopbox svg { width: 120px; height: 120px; color: var(--on); }
 .stopbox h1 { color: var(--on); font-size: 36px; }
 .stopbox p { margin: 0; font-size: 20px; font-weight: 700; }
+.rep .tile { min-height: 150px; }
+.mine { display: flex; justify-content: space-between; gap: 10px; padding-top: 6px; border-top: 1px solid #EFD9BC; }
+.mine b { color: var(--blue); white-space: nowrap; }
 @keyframes pop { from { transform: scale(.85); opacity: .3; } to { transform: scale(1); opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .art { animation: none; } }
 </style>
@@ -283,6 +286,34 @@ function localize() {
   });
 }
 
+/* 시연용: 같은 브라우저 안에서 노동자 앱과 관리자 화면이 주고받는 데이터 */
+const PRESETS = {
+  opening3: { go: "opening", icon: "hole", ko: "3층 개구부 작업", zh: "3楼洞口作业", vi: "Làm việc ở lỗ sàn tầng 3", th: "งานช่องเปิดชั้น 3", ru: "Работа у проёма на 3 этаже" },
+  hot2: { go: "hot", icon: "flame", ko: "오후 2시 지하 용접 작업", zh: "下午2点地下焊接作业", vi: "Hàn ở tầng hầm lúc 2 giờ chiều", th: "งานเชื่อมชั้นใต้ดิน บ่าย 2 โมง", ru: "Сварка в подвале в 14:00" },
+  crane: { go: "carry", icon: "crane", ko: "오후 크레인 인양 작업, 아래로 지나가지 마세요", zh: "下午吊车吊装作业，请勿从下方经过。", vi: "Chiều nay có cẩu hàng, không đi bên dưới.", th: "บ่ายนี้มีงานเครนยกของ ห้ามเดินผ่านด้านล่าง", ru: "Днём работает кран, не проходите под грузом." },
+  manhole: { go: "confined", icon: "gas", ko: "지하 맨홀 작업, 측정 전 출입 금지", zh: "地下检查井作业，测量前禁止进入。", vi: "Làm việc ở hố ga, cấm vào trước khi đo khí.", th: "งานบ่อพักใต้ดิน ห้ามเข้าก่อนวัดก๊าซ", ru: "Работа в колодце, вход запрещён до замера газов." },
+  digger: { go: "excavate", icon: "dig", ko: "굴착기 작업 구역, 신호수 지시를 따르세요", zh: "挖掘机作业区，请听从信号员指挥。", vi: "Khu vực máy xúc, hãy làm theo người xi-nhan.", th: "พื้นที่รถขุด ให้ทำตามคนให้สัญญาณ", ru: "Зона работы экскаватора, выполняйте указания сигнальщика." }
+};
+const REPORTS = {
+  guard: { icon: "guard", ko: "난간이 없어요", zh: "没有栏杆", vi: "Không có lan can", th: "ไม่มีราวกันตก", ru: "Нет ограждения" },
+  cover: { icon: "hole", ko: "덮개가 열려 있어요", zh: "盖板开着", vi: "Nắp che đang mở", th: "ฝาปิดเปิดอยู่", ru: "Щит открыт" },
+  cable: { icon: "cable", ko: "전선이 위험해요", zh: "电线危险", vi: "Dây điện nguy hiểm", th: "สายไฟอันตราย", ru: "Опасный провод" },
+  fire: { icon: "flame", ko: "불이나 연기가 있어요", zh: "有火或烟", vi: "Có lửa hoặc khói", th: "มีไฟหรือควัน", ru: "Огонь или дым" },
+  machine: { icon: "truck", ko: "장비가 위험해요", zh: "设备危险", vi: "Thiết bị nguy hiểm", th: "เครื่องจักรอันตราย", ru: "Опасная техника" },
+  soil: { icon: "dig", ko: "흙이 무너질 것 같아요", zh: "土方可能坍塌", vi: "Đất có thể sụp", th: "ดินอาจถล่ม", ru: "Грунт может обрушиться" }
+};
+const TASKNAME = { gear: "보호구 착용", opening: "개구부 주변 작업", scaffold: "비계 위 작업", ladder: "사다리 작업", hot: "용접·절단 작업", electric: "전기·양수기 작업", excavate: "땅파기 주변 작업", confined: "맨홀·밀폐공간 작업", signal: "장비 신호수", carry: "자재 운반", concrete: "콘크리트 타설 보조", clean: "현장 정리·청소" };
+const DEMO = {
+  read(k, d) { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch (e) { return d; } },
+  write(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} },
+  hazards() { return DEMO.read("demo-hazards", ["opening3", "hot2"]); },
+  events() { return DEMO.read("demo-events", []); },
+  add(ev) {
+    const a = DEMO.events();
+    a.unshift({ id: Date.now() + "-" + Math.round(Math.random() * 1e4), at: new Date().toISOString(), status: "접수", ...ev });
+    DEMO.write("demo-events", a.slice(0, 100));
+  }
+};
 /* 1단계: 고위험 작업, 작업 전 확인, 오늘의 위험 */
 Object.assign(ICON, {
   scaffold: `<path ${S} d="M14 6v52M50 6v52M14 22h36M14 42h36M14 22l36 20"/><path ${S} d="M8 58h48"/>`,
@@ -416,7 +447,7 @@ function fmt(s) { s = Math.floor(s); return `${Math.floor(s / 60)}:${String(s % 
 function page(cls) { document.body.className = cls; window.scrollTo(0, 0); }
 function showTabs(active) {
   tabs.hidden = false;
-  tabs.innerHTML = `<button class="${active === "v" ? "on" : ""}" data-go="">${u2().tabV}</button><button class="${active === "t" ? "on" : ""}" data-go="talk">${u2().tabT}</button>`;
+  tabs.innerHTML = `<button class="${active === "v" ? "on" : ""}" data-go="">${u2().tabV}</button><button class="${active === "r" ? "on" : ""}" data-go="report">${UI4[lang].tab}</button><button class="${active === "t" ? "on" : ""}" data-go="talk">${u2().tabT}</button>`;
 }
 function note() { return `<div class="note"><p><strong>${u().n1}</strong> ${u().n1b}</p><p>${u().n2}</p><p>${u().n3}</p></div>`; }
 function langBtn() { return `<button class="langbtn" data-picker>${LANGS.find(l => l.id === lang).name}</button>`; }
@@ -427,12 +458,31 @@ function home() {
     ${hazardCard()}
     <div class="tiles">${TASKS.map(x => `<button class="tile" data-go="${x.id}">${svg(x.icon)}<span>${x.lname}</span>${seen.includes(x.id) ? `<span class="seen">✓ ${u().seen}</span>` : ""}</button>`).join("")}</div>${note()}`;
 }
+function hazardKey() { return dayKey() + "-" + DEMO.hazards().join(","); }
 function hazardCard() {
-  const x = UI3[lang], seen = saved(dayKey());
+  const x = UI3[lang], list = DEMO.hazards().filter(k => PRESETS[k]);
+  if (!list.length) return "";
   return `<section class="hazard"><div class="hz-top"><strong>${x.today}</strong><small>${x.sample}</small></div>
-    <button class="hz" data-go="opening"><span class="hz-ic">${svg("hole")}</span><span>${x.h1}</span></button>
-    <button class="hz" data-go="hot"><span class="hz-ic">${svg("flame")}</span><span>${x.h2}</span></button>
-    ${seen ? `<p class="hz-done">✓ ${x.done}</p>` : `<button class="hz-ok" data-confirm>${x.ok}</button>`}</section>`;
+    ${list.map(k => `<button class="hz" data-go="${PRESETS[k].go}"><span class="hz-ic">${svg(PRESETS[k].icon)}</span><span>${PRESETS[k][lang]}</span></button>`).join("")}
+    ${saved(hazardKey()) ? `<p class="hz-done">✓ ${x.done}</p>` : `<button class="hz-ok" data-confirm>${x.ok}</button>`}</section>`;
+}
+const UI4 = {
+  ko: { tab: "위험 신고", title: "위험을 봤나요?", hint: "누르면 관리자에게 바로 전달됩니다.", sent: "관리자에게 보냈어요", mine: "내 신고", more: "다른 위험 신고", demo: "시연 화면: 같은 기기의 관리자 화면에만 전달됩니다." },
+  zh: { tab: "危险报告", title: "看到危险了吗？", hint: "点击后立即发送给管理人员。", sent: "已发送给管理人员", mine: "我的报告", more: "报告其他危险", demo: "演示画面：仅发送到同一设备的管理页面。" },
+  vi: { tab: "Báo nguy hiểm", title: "Bạn thấy nguy hiểm?", hint: "Chạm để gửi ngay cho người quản lý.", sent: "Đã gửi cho người quản lý", mine: "Báo cáo của tôi", more: "Báo nguy hiểm khác", demo: "Màn hình thử: chỉ gửi đến trang quản lý trên cùng thiết bị." },
+  th: { tab: "แจ้งอันตราย", title: "เห็นอันตรายไหม?", hint: "แตะเพื่อส่งถึงผู้ดูแลทันที", sent: "ส่งถึงผู้ดูแลแล้ว", mine: "รายงานของฉัน", more: "แจ้งอันตรายอื่น", demo: "หน้าสาธิต: ส่งถึงหน้าผู้ดูแลในอุปกรณ์เดียวกันเท่านั้น" },
+  ru: { tab: "Сообщить", title: "Видите опасность?", hint: "Нажмите, и руководитель сразу получит сообщение.", sent: "Отправлено руководителю", mine: "Мои сообщения", more: "Сообщить о другой опасности", demo: "Демо: отправка только на страницу руководителя на этом устройстве." }
+};
+const STATUS = { ko: { "접수": "접수", "확인 중": "확인 중", "조치 완료": "조치 완료" }, zh: { "접수": "已接收", "확인 중": "确认中", "조치 완료": "已处理" }, vi: { "접수": "Đã nhận", "확인 중": "Đang kiểm tra", "조치 완료": "Đã xử lý" }, th: { "접수": "รับเรื่องแล้ว", "확인 중": "กำลังตรวจสอบ", "조치 완료": "แก้ไขแล้ว" }, ru: { "접수": "Получено", "확인 중": "Проверяется", "조치 완료": "Устранено" } };
+function reportView(sent) {
+  stop(); cur = null; page("work"); showTabs("r");
+  const x = UI4[lang], st = DEMO.read("demo-seed-status", {});
+  const mine = DEMO.events().filter(e => e.type === "report").slice(0, 5);
+  app.innerHTML = `<div class="top"><h1>${x.title}</h1>${langBtn()}</div>
+    ${sent ? `<p class="hz-done" role="status">✓ ${x.sent}</p>` : `<p class="hint">${x.hint}</p>`}
+    <div class="tiles rep">${Object.entries(REPORTS).map(([k, r]) => `<button class="tile" data-report="${k}">${svg(r.icon)}<span>${r[lang]}</span></button>`).join("")}</div>
+    ${mine.length ? `<section class="hazard"><strong>${x.mine}</strong>${mine.map(e => `<div class="mine"><span>${REPORTS[e.key][lang]}</span><b>${STATUS[lang][st[e.id] || e.status]}</b></div>`).join("")}</section>` : ""}
+    <p class="hint">${x.demo}</p>`;
 }
 let answers = [], skipGate = false;
 function checkView(task) {
@@ -509,7 +559,7 @@ function ended() {
 function tick(now) {
   if (!playing) return;
   t += Math.max(0, (now - last) / 1000); last = now;
-  if (t >= DURATION) { t = DURATION; playing = false; hush(); store.add(cur.id); draw(); ended(); return; }
+  if (t >= DURATION) { t = DURATION; playing = false; hush(); store.add(cur.id); DEMO.add({ type: "done", task: cur.id, lang }); draw(); ended(); return; }
   draw(); timer = requestAnimationFrame(tick);
 }
 function play() {
@@ -523,17 +573,18 @@ document.addEventListener("click", e => {
   if (c("#closeover")) { overlay.hidden = true; hush(); return; }
   if ((el = c("[data-lang]"))) { lang = el.dataset.lang; langStore.set(lang); subLang = null; subStore.set(null); soundLang = null; keep("sound", null); target = null; keep("target", null); route(); return; }
   if (c("[data-picker]")) { picker(); return; }
-  if (c("[data-confirm]")) { keep(dayKey(), "1"); home(); return; }
+  if (c("[data-confirm]")) { keep(hazardKey(), "1"); DEMO.add({ type: "confirm", lang }); home(); return; }
+  if ((el = c("[data-report]"))) { DEMO.add({ type: "report", key: el.dataset.report, item: REPORTS[el.dataset.report].ko, lang }); reportView(true); window.scrollTo(0, 0); return; }
   if ((el = c("[data-chk]"))) {
     const task = TASKS.find(x => x.id === location.hash.slice(1));
-    if (el.dataset.v === "n") { stopView(task); return; }
+    if (el.dataset.v === "n") { DEMO.add({ type: "stop", task: task.id, item: CHECKS[task.id].ko[+el.dataset.chk], lang }); stopView(task); return; }
     answers[+el.dataset.chk] = true;
     if (CHECKS[task.id][lang].every((_, i) => answers[i])) { skipGate = true; wantPlay = true; route(); return; }
     checkView(task); return;
   }
   if (c("[data-watch]")) { skipGate = true; wantPlay = true; route(); return; }
   if ((el = c("[data-go]"))) {
-    wantPlay = !!el.dataset.go && el.dataset.go !== "talk";
+    wantPlay = !!el.dataset.go && el.dataset.go !== "talk" && el.dataset.go !== "report";
     if (location.hash.slice(1) === el.dataset.go) route(); else location.hash = el.dataset.go;
     return;
   }
@@ -569,12 +620,18 @@ function route() {
   localize();
   const h = location.hash.slice(1);
   if (h === "talk") { talk(); return; }
+  if (h === "report") { reportView(false); return; }
   const task = TASKS.find(x => x.id === h);
   if (task && CHECKS[task.id] && wantPlay && !skipGate) { answers = []; wantPlay = false; checkView(task); return; }
   skipGate = false;
   task ? detail(task) : home();
 }
 addEventListener("hashchange", route);
+addEventListener("storage", e => {
+  const h = location.hash.slice(1);
+  if (e.key === "demo-hazards" && !h) home();
+  if (e.key === "demo-seed-status" && h === "report") reportView(false);
+});
 route();
 </script>
 

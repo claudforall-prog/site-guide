@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>현장 안전 관리자</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&family=Gothic+A1:wght@400;500;700;800&display=swap">
+<style>
+/* Layout: 위에 오늘 요약, 왼쪽 할 일(신고·공지), 오른쪽 기록(언어별 이수·작업자). 노동자 앱과 같은 따뜻한 색. */
+:root { --accent: #B8430F; --ground: #FFF5E6; --surface: #FFFFFF; --ink: #3A2417; --muted: #6B5344; --line: #EFD9BC; --chip: #F7E3C8; --honey: #FFC766; --no: #A8200F; --no-bg: #FFE4DC; --ok: #3F5D12; --ok-bg: #EEF3D6; --wait: #7A5200; --wait-bg: #FFF0C2; --display: "Jua", "Gothic A1", sans-serif; --font: "Gothic A1", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--ground); color: var(--ink); font: 400 16px/1.5 var(--font); word-break: keep-all; overflow-wrap: anywhere; }
+button, select { font: inherit; color: inherit; }
+button { cursor: pointer; }
+button:focus-visible, a:focus-visible, select:focus-visible, input:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.wrap { max-width: 1240px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.demo { background: var(--ink); color: #FFF; font-size: 14px; }
+.demo .wrap { padding-block: 8px; display: flex; flex-wrap: wrap; gap: 6px 14px; justify-content: space-between; align-items: center; }
+.demo button { min-height: 36px; padding: 0 12px; border: 1px solid #FFF; border-radius: 8px; background: transparent; color: #FFF; }
+header { background: var(--honey); }
+header .wrap { padding-block: 16px; display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; align-items: center; }
+h1 { margin: 0; font: 400 30px/1.2 var(--display); }
+.site { font-weight: 700; }
+.head-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.btn { min-height: 44px; padding: 0 16px; border-radius: 12px; border: 0; background: var(--accent); color: #FFF; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; text-decoration: none; }
+.btn.alt { background: var(--surface); color: var(--ink); }
+main .wrap { padding-block: 18px 40px; display: flex; flex-direction: column; gap: 16px; }
+.kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.kpi { background: var(--surface); border-radius: 18px; padding: 14px 16px; }
+.kpi span { display: block; font-size: 14px; color: var(--muted); font-weight: 700; }
+.kpi strong { font-size: 32px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.kpi small { font-size: 14px; color: var(--muted); }
+.kpi.alert strong { color: var(--no); }
+.cols { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+.stack { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+section { background: var(--surface); border-radius: 18px; padding: 16px; min-width: 0; }
+h2 { margin: 0 0 10px; font-size: 19px; font-weight: 800; }
+.hint { margin: -6px 0 10px; color: var(--muted); font-size: 14px; }
+.ev { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px 12px; padding: 12px 0; border-top: 1px solid var(--line); align-items: center; }
+.ev:first-of-type { border-top: 0; }
+.ev strong { display: block; font-weight: 700; }
+.ev small { color: var(--muted); font-size: 14px; }
+.tag { display: inline-block; padding: 1px 8px; border-radius: 6px; font-size: 13px; font-weight: 800; margin-right: 6px; }
+.tag.stop { background: var(--no); color: #FFF; }
+.tag.report { background: var(--wait-bg); color: var(--wait); }
+.ev select { min-height: 40px; border-radius: 10px; border: 1px solid var(--muted); background: var(--surface); padding: 0 8px; }
+.ev.done { opacity: .72; }
+.empty { color: var(--muted); padding: 10px 0; margin: 0; }
+.preset { display: grid; grid-template-columns: 24px minmax(0, 1fr); gap: 10px; padding: 8px 0; align-items: start; cursor: pointer; }
+.preset input { width: 20px; height: 20px; margin: 2px 0 0; accent-color: var(--accent); }
+.preset small { display: block; color: var(--muted); font-size: 13px; }
+.sent { margin: 10px 0 0; color: var(--ok); font-weight: 700; min-height: 1.5em; }
+.bars { display: flex; flex-direction: column; gap: 10px; }
+.bar { display: grid; grid-template-columns: 76px minmax(0, 1fr) 60px; gap: 8px; align-items: center; font-size: 14px; font-weight: 700; }
+.bar i { display: block; height: 14px; background: var(--chip); border-radius: 7px; overflow: hidden; }
+.bar b { display: block; height: 100%; background: var(--accent); }
+.bar span:last-child { text-align: right; font-variant-numeric: tabular-nums; }
+.table { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 480px; }
+th, td { text-align: left; padding: 8px 6px; border-top: 1px solid var(--line); white-space: nowrap; }
+th { border-top: 0; color: var(--muted); font-size: 13px; }
+.state { font-weight: 700; }
+.state.yes { color: var(--ok); }
+.state.no { color: var(--no); }
+.new td { background: var(--wait-bg); }
+@media (max-width: 860px) { .cols { grid-template-columns: minmax(0, 1fr); } .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+</style>
+</head>
+<body>
+<div class="demo"><div class="wrap"><span>시연 화면입니다. 사람과 현장, 기록은 모두 예시이며 실제 데이터가 아닙니다.</span><button id="reset">시연 초기화</button></div></div>
+<header><div class="wrap">
+  <div><h1>현장 안전 관리자</h1><span class="site">가나건설 다라 신축 현장 (예시)</span></div>
+  <div class="head-actions"><a class="btn alt" href="./" target="_blank">노동자 앱 열기</a><button class="btn" id="csv">오늘 기록 내려받기</button></div>
+</div></header>
+<main><div class="wrap">
+  <div class="kpis" id="kpis"></div>
+  <div class="cols">
+    <div class="stack">
+      <section><h2>처리할 멈춤·신고</h2><p class="hint">노동자가 모국어로 보낸 내용이 한국어로 표시됩니다.</p><div id="events"></div></section>
+      <section><h2>오늘의 위험 공지</h2><p class="hint">검수된 문장을 고르면 노동자 언어로 나갑니다.</p><div id="presets"></div><button class="btn" id="send">노동자에게 보내기</button><p class="sent" id="sent" role="status"></p></section>
+    </div>
+    <div class="stack">
+      <section><h2>언어별 오늘 위험 확인</h2><div class="bars" id="bars"></div></section>
+      <section><h2>작업자 현황</h2><div class="table"><table><thead><tr><th>작업자</th><th>언어</th><th>오늘 작업</th><th>위험 확인</th><th>영상</th></tr></thead><tbody id="rows"></tbody></table></div></section>
+    </div>
+  </div>
+</div></main>
+<script>
+/* 시연용: 같은 브라우저 안에서 노동자 앱과 관리자 화면이 주고받는 데이터 */
+const PRESETS = {
+  opening3: { go: "opening", icon: "hole", ko: "3층 개구부 작업", zh: "3楼洞口作业", vi: "Làm việc ở lỗ sàn tầng 3", th: "งานช่องเปิดชั้น 3", ru: "Работа у проёма на 3 этаже" },
+  hot2: { go: "hot", icon: "flame", ko: "오후 2시 지하 용접 작업", zh: "下午2点地下焊接作业", vi: "Hàn ở tầng hầm lúc 2 giờ chiều", th: "งานเชื่อมชั้นใต้ดิน บ่าย 2 โมง", ru: "Сварка в подвале в 14:00" },
+  crane: { go: "carry", icon: "crane", ko: "오후 크레인 인양 작업, 아래로 지나가지 마세요", zh: "下午吊车吊装作业，请勿从下方经过。", vi: "Chiều nay có cẩu hàng, không đi bên dưới.", th: "บ่ายนี้มีงานเครนยกของ ห้ามเดินผ่านด้านล่าง", ru: "Днём работает кран, не проходите под грузом." },
+  manhole: { go: "confined", icon: "gas", ko: "지하 맨홀 작업, 측정 전 출입 금지", zh: "地下检查井作业，测量前禁止进入。", vi: "Làm việc ở hố ga, cấm vào trước khi đo khí.", th: "งานบ่อพักใต้ดิน ห้ามเข้าก่อนวัดก๊าซ", ru: "Работа в колодце, вход запрещён до замера газов." },
+  digger: { go: "excavate", icon: "dig", ko: "굴착기 작업 구역, 신호수 지시를 따르세요", zh: "挖掘机作业区，请听从信号员指挥。", vi: "Khu vực máy xúc, hãy làm theo người xi-nhan.", th: "พื้นที่รถขุด ให้ทำตามคนให้สัญญาณ", ru: "Зона работы экскаватора, выполняйте указания сигнальщика." }
+};
+const REPORTS = {
+  guard: { icon: "guard", ko: "난간이 없어요", zh: "没有栏杆", vi: "Không có lan can", th: "ไม่มีราวกันตก", ru: "Нет ограждения" },
+  cover: { icon: "hole", ko: "덮개가 열려 있어요", zh: "盖板开着", vi: "Nắp che đang mở", th: "ฝาปิดเปิดอยู่", ru: "Щит открыт" },
+  cable: { icon: "cable", ko: "전선이 위험해요", zh: "电线危险", vi: "Dây điện nguy hiểm", th: "สายไฟอันตราย", ru: "Опасный провод" },
+  fire: { icon: "flame", ko: "불이나 연기가 있어요", zh: "有火或烟", vi: "Có lửa hoặc khói", th: "มีไฟหรือควัน", ru: "Огонь или дым" },
+  machine: { icon: "truck", ko: "장비가 위험해요", zh: "设备危险", vi: "Thiết bị nguy hiểm", th: "เครื่องจักรอันตราย", ru: "Опасная техника" },
+  soil: { icon: "dig", ko: "흙이 무너질 것 같아요", zh: "土方可能坍塌", vi: "Đất có thể sụp", th: "ดินอาจถล่ม", ru: "Грунт может обрушиться" }
+};
+const TASKNAME = { gear: "보호구 착용", opening: "개구부 주변 작업", scaffold: "비계 위 작업", ladder: "사다리 작업", hot: "용접·절단 작업", electric: "전기·양수기 작업", excavate: "땅파기 주변 작업", confined: "맨홀·밀폐공간 작업", signal: "장비 신호수", carry: "자재 운반", concrete: "콘크리트 타설 보조", clean: "현장 정리·청소" };
+const DEMO = {
+  read(k, d) { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch (e) { return d; } },
+  write(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} },
+  hazards() { return DEMO.read("demo-hazards", ["opening3", "hot2"]); },
+  events() { return DEMO.read("demo-events", []); },
+  add(ev) {
+    const a = DEMO.events();
+    a.unshift({ id: Date.now() + "-" + Math.round(Math.random() * 1e4), at: new Date().toISOString(), status: "접수", ...ev });
+    DEMO.write("demo-events", a.slice(0, 100));
+  }
+};
+
+const LANGNAME = { ko: "한국어", zh: "중국어", vi: "베트남어", th: "태국어", ru: "러시아어" };
+const SEED = [
+  ["김○○", "ko", "opening", 1, 1], ["이○○", "ko", "carry", 1, 1], ["박○○", "ko", "signal", 1, 1], ["최○○", "ko", "hot", 0, 0],
+  ["왕○○", "zh", "opening", 1, 1], ["리○○", "zh", "concrete", 1, 0], ["장○○", "zh", "scaffold", 1, 1], ["천○○", "zh", "carry", 0, 0],
+  ["응우옌○○", "vi", "clean", 1, 1], ["쩐○○", "vi", "ladder", 1, 0],
+  ["솜○○", "th", "carry", 1, 1],
+  ["알렉○○", "ru", "excavate", 0, 1]
+].map(r => ({ name: r[0], lang: r[1], task: r[2], ok: !!r[3], video: !!r[4] }));
+const SEED_EVENTS = [
+  { id: "s1", kind: "stop", lang: "zh", task: "hot", item: "화재감시자가 있나요?", who: "왕○○", min: 12, status: "확인 중" },
+  { id: "s2", kind: "report", lang: "vi", item: "덮개가 열려 있어요", who: "응우옌○○", min: 34, status: "접수" },
+  { id: "s3", kind: "report", lang: "ru", item: "난간이 없어요", who: "알렉○○", min: 95, status: "조치 완료" }
+];
+function allEvents() {
+  const statuses = DEMO.read("demo-seed-status", {});
+  const live = DEMO.events().filter(e => e.type === "stop" || e.type === "report").map(e => ({ id: e.id, kind: e.type, lang: e.lang, task: e.task, item: e.item, who: "시연 폰", at: e.at, status: statuses[e.id] || e.status, live: true }));
+  const seed = SEED_EVENTS.map(e => ({ ...e, status: statuses[e.id] || e.status }));
+  return [...live, ...seed];
+}
+function liveWorker() {
+  const ev = DEMO.events();
+  if (!ev.length) return null;
+  const last = ev[0];
+  const task = (ev.find(e => e.task) || {}).task;
+  return { name: "시연 폰", lang: last.lang, task, ok: ev.some(e => e.type === "confirm"), video: ev.some(e => e.type === "done"), live: true };
+}
+function workers() { const l = liveWorker(); return l ? [l, ...SEED] : SEED; }
+function timeText(e) {
+  if (e.at) return new Date(e.at).toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" });
+  return e.min + "분 전";
+}
+function render() {
+  const w = workers(), ev = allEvents();
+  const okN = w.filter(x => x.ok).length, open = ev.filter(e => e.status !== "조치 완료").length, stops = ev.filter(e => e.kind === "stop").length;
+  document.getElementById("kpis").innerHTML =
+    `<div class="kpi"><span>오늘 앱 사용 작업자</span><strong>${w.length}</strong><small>명</small></div>
+     <div class="kpi"><span>오늘 위험 확인</span><strong>${Math.round(okN / w.length * 100)}%</strong><small>${okN}/${w.length}명</small></div>
+     <div class="kpi ${stops ? "alert" : ""}"><span>작업 전 "아니요"</span><strong>${stops}</strong><small>건</small></div>
+     <div class="kpi ${open ? "alert" : ""}"><span>처리 안 된 건</span><strong>${open}</strong><small>건</small></div>`;
+  document.getElementById("events").innerHTML = ev.length ? ev.map(e => `<div class="ev ${e.status === "조치 완료" ? "done" : ""}">
+      <div><span class="tag ${e.kind}">${e.kind === "stop" ? "작업 멈춤" : "위험 신고"}</span><strong>${e.kind === "stop" ? `${TASKNAME[e.task] || ""}: ${e.item} → 아니요` : e.item}</strong>
+      <small>${e.who} · ${LANGNAME[e.lang] || ""} · ${timeText(e)}</small></div>
+      <select id="st-${e.id}" data-ev="${e.id}" aria-label="처리 상태">${["접수", "확인 중", "조치 완료"].map(s => `<option ${s === e.status ? "selected" : ""}>${s}</option>`).join("")}</select></div>`).join("") : `<p class="empty">처리할 건이 없습니다.</p>`;
+  const active = DEMO.hazards();
+  document.getElementById("presets").innerHTML = Object.entries(PRESETS).map(([k, p]) => `<label class="preset"><input type="checkbox" id="pr-${k}" value="${k}" ${active.includes(k) ? "checked" : ""}><span>${p.ko}<small lang="zh">${p.zh}</small></span></label>`).join("");
+  document.getElementById("bars").innerHTML = Object.keys(LANGNAME).map(l => {
+    const a = w.filter(x => x.lang === l), n = a.filter(x => x.ok).length, pct = a.length ? n / a.length * 100 : 0;
+    return `<div class="bar"><span>${LANGNAME[l]}</span><i><b style="width:${pct}%"></b></i><span>${n}/${a.length}명</span></div>`;
+  }).join("");
+  document.getElementById("rows").innerHTML = w.map(x => `<tr class="${x.live ? "new" : ""}"><td>${x.name}</td><td>${LANGNAME[x.lang] || "-"}</td><td>${TASKNAME[x.task] || "-"}</td><td class="state ${x.ok ? "yes" : "no"}">${x.ok ? "확인" : "미확인"}</td><td class="state ${x.video ? "yes" : "no"}">${x.video ? "시청" : "미시청"}</td></tr>`).join("");
+}
+document.addEventListener("change", e => {
+  const id = e.target.dataset.ev;
+  if (!id) return;
+  const s = DEMO.read("demo-seed-status", {}); s[id] = e.target.value; DEMO.write("demo-seed-status", s); render();
+});
+document.getElementById("send").addEventListener("click", () => {
+  const picked = [...document.querySelectorAll("#presets input:checked")].map(i => i.value);
+  DEMO.write("demo-hazards", picked);
+  document.getElementById("sent").textContent = `${picked.length}개 공지를 보냈습니다. 노동자 앱에 바로 표시됩니다.`;
+});
+document.getElementById("reset").addEventListener("click", () => {
+  ["demo-events", "demo-hazards", "demo-seed-status"].forEach(k => { try { localStorage.removeItem(k); } catch (e) {} });
+  document.getElementById("sent").textContent = "";
+  render();
+});
+document.getElementById("csv").addEventListener("click", () => {
+  const q = v => `"${String(v ?? "").replace(/"/g, '""')}"`;
+  const lines = [["구분", "작업자", "언어", "내용", "상태", "시각"].map(q).join(",")];
+  allEvents().forEach(e => lines.push([e.kind === "stop" ? "작업 멈춤" : "위험 신고", e.who, LANGNAME[e.lang], (e.task ? TASKNAME[e.task] + ": " : "") + e.item, e.status, timeText(e)].map(q).join(",")));
+  workers().forEach(x => lines.push(["작업자 현황", x.name, LANGNAME[x.lang], TASKNAME[x.task], x.ok ? "위험 확인" : "미확인", x.video ? "영상 시청" : "미시청"].map(q).join(",")));
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob(["﻿" + lines.join("\n")], { type: "text/csv;charset=utf-8" }));
+  a.download = "site-safety-demo.csv"; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+});
+addEventListener("storage", render);
+render();
+</script>
+</body>
+</html>
