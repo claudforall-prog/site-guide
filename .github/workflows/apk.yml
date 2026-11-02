@@ -1,0 +1,32 @@
+name: Build Android app
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - android-src.zip
+      - .github/workflows/apk.yml
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.9"
+      - name: Build APK
+        run: |
+          mkdir android && cd android && unzip -q ../android-src.zip
+          gradle --no-daemon assembleDebug
+          cp app/build/outputs/apk/debug/app-debug.apk ../site-guide.apk
+      - name: Publish APK
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release delete app --yes --cleanup-tag || true
+          gh release create app site-guide.apk --title "오늘의 작업 안내 앱" --notes "삼성·안드로이드용 설치 파일"
