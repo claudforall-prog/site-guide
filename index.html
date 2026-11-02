@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#1B64DA">
+<meta name="theme-color" content="#FFC766">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -15,12 +15,12 @@
 <title>오늘의 작업 안내</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gothic+A1:wght@400;500;700;800&family=Noto+Sans:wght@400;500;700;800&family=Noto+Sans+SC:wght@400;500;700;800&family=Noto+Sans+Thai:wght@400;500;700;800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&family=Gothic+A1:wght@400;500;700;800&family=Noto+Sans:wght@400;500;700;800&family=Noto+Sans+SC:wght@400;500;700;800&family=Noto+Sans+Thai:wght@400;500;700;800&display=swap">
 <style>
 /* Layout: 그림 타일 → 영상과 O/X 그림 카드. 아래 탭에 현장 말하기. 햇빛 아래에서 잘 보이도록 밝은 단일 테마. */
 :root {
-  --blue: #1B64DA; --ground: #F4F6FA; --surface: #FFFFFF; --ink: #191F28; --muted: #4E5968; --chip: #E3E9F2;
-  --ok: #0B5D35; --ok-bg: #E5F4EC; --no: #A8200F; --no-bg: #FFECEA; --stage: #191F28; --on: #FFFFFF;
+  --blue: #B8430F; --ground: #FFF5E6; --surface: #FFFFFF; --ink: #3A2417; --muted: #6B5344; --chip: #F7E3C8; --honey: #FFC766; --display: "Jua", "Gothic A1", sans-serif;
+  --ok: #3F5D12; --ok-bg: #EEF3D6; --no: #A8200F; --no-bg: #FFE4DC; --stage: #3A2417; --on: #FFFFFF;
   --font: "Gothic A1", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
 }
 html:lang(zh) { --font: "Noto Sans SC", "PingFang SC", sans-serif; }
@@ -30,23 +30,27 @@ html:lang(th) { --font: "Noto Sans Thai", Thonburi, Tahoma, sans-serif; }
 html, body { background: var(--ground); }
 body { min-height: 100vh; min-height: 100dvh; color: var(--ink); font: 400 17px/1.45 var(--font); overflow-wrap: anywhere; }
 html:lang(ko) body { word-break: keep-all; }
-body.home { background: var(--blue); }
+
 button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
 button:focus-visible { outline: 3px solid #FFB800; outline-offset: 2px; }
 .wrap { max-width: 620px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 18px 104px; display: flex; flex-direction: column; gap: 14px; }
 .top { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
-h1 { margin: 0; font-size: 28px; line-height: 1.25; font-weight: 800; text-wrap: balance; min-width: 0; }
-.home h1, .home .note, .home .note strong { color: var(--on); }
+h1 { margin: 0; font-size: 28px; line-height: 1.25; font-weight: 800; color: var(--ink); text-wrap: balance; min-width: 0; }
+.hero { background: var(--honey); border-radius: 28px; padding: 18px; display: flex; flex-direction: column; gap: 10px; }
+.hero h1 { font-family: var(--display); font-weight: 400; font-size: 32px; }
+html:not(:lang(ko)) .hero h1 { font-family: var(--font); font-weight: 800; font-size: 27px; }
+.hero p { margin: 0; font-size: 18px; font-weight: 700; }
+.hero .langbtn { align-self: flex-end; }
 .langbtn { flex: none; display: inline-flex; align-items: center; min-height: 44px; padding: 0 14px; border: 2px solid currentColor; border-radius: 22px; font-weight: 700; font-size: 16px; }
-.home .langbtn { color: var(--on); }
 .tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
-.tile { position: relative; min-height: 176px; padding: 14px 10px; border-radius: 22px; background: var(--surface); display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 10px; text-align: center; font-size: 20px; font-weight: 800; line-height: 1.25; }
-.tile svg { width: 88px; height: 88px; color: var(--blue); }
+.tile { position: relative; min-height: 176px; padding: 14px 10px; border-radius: 28px; box-shadow: 0 2px 0 #EFD9BC; background: var(--surface); display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 10px; text-align: center; font-size: 20px; font-weight: 800; line-height: 1.25; }
+.tile svg { width: 96px; height: 96px; padding: 14px; border-radius: 50%; color: #7A3410; background: #FFE3B8; }
+.tile:nth-child(2) svg { background: #FFD6C4; } .tile:nth-child(3) svg { background: #E7EDC4; } .tile:nth-child(4) svg { background: #FCE6A0; } .tile:nth-child(5) svg { background: #F6D8C8; } .tile:nth-child(6) svg { background: #EFE0C8; }
 .tile .seen { position: absolute; top: 10px; right: 12px; font-size: 14px; color: var(--ok); }
 .note { font-size: 15px; color: var(--muted); }
 .note p { margin: 0 0 6px; }
 .back { align-self: flex-start; min-height: 44px; font-weight: 700; }
-.player { background: var(--stage); color: var(--on); border-radius: 16px; overflow: hidden; }
+.player { background: var(--stage); color: var(--on); border-radius: 24px; overflow: hidden; }
 .screen { position: relative; aspect-ratio: 16 / 10; max-width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 44px 14px 12px; text-align: center; }
 .badge { position: absolute; top: 12px; left: 12px; padding: 2px 10px; border-radius: 6px; font-weight: 800; font-size: 15px; background: var(--blue); }
 .badge.warn { background: #C8200F; }
@@ -55,14 +59,14 @@ h1 { margin: 0; font-size: 28px; line-height: 1.25; font-weight: 800; text-wrap:
 .art svg { width: 100%; height: 100%; }
 .art .no { position: absolute; inset: -6%; color: #FF5B47; }
 .cap { margin: 0; font-size: clamp(18px, 5vw, 22px); font-weight: 700; line-height: 1.35; text-wrap: balance; }
-.big { position: absolute; inset: 0; width: 100%; display: grid; place-items: center; background: rgba(25,31,40,.7); font-size: 24px; font-weight: 800; text-align: center; color: var(--on); }
+.big { position: absolute; inset: 0; width: 100%; display: grid; place-items: center; background: rgba(58,36,23,.72); font-size: 24px; font-weight: 800; text-align: center; color: var(--on); }
 .controls { display: grid; grid-template-columns: 52px minmax(0, 1fr) auto; gap: 8px; align-items: center; padding: 6px 12px 6px 6px; }
 .pp { width: 52px; height: 48px; display: grid; place-items: center; }
 .pp svg { width: 28px; height: 28px; fill: var(--on); }
 .segs { display: flex; gap: 3px; }
 .seg { flex: 1; height: 44px; display: flex; align-items: center; min-width: 0; }
-.seg i { display: block; width: 100%; height: 8px; background: #5A6472; position: relative; overflow: hidden; }
-.seg i b { position: absolute; inset: 0 auto 0 0; background: #6FA5FF; }
+.seg i { display: block; width: 100%; height: 8px; background: #7A6556; position: relative; overflow: hidden; }
+.seg i b { position: absolute; inset: 0 auto 0 0; background: #FFC766; }
 .seg.warn i b { background: #FF8A7A; }
 .time { font-variant-numeric: tabular-nums; font-size: 15px; white-space: nowrap; }
 .media { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 8px 10px; align-items: center; font-weight: 700; font-size: 15px; }
@@ -70,7 +74,7 @@ h1 { margin: 0; font-size: 28px; line-height: 1.25; font-weight: 800; text-wrap:
 .chip { min-height: 40px; padding: 0 12px; border-radius: 20px; background: var(--chip); font-size: 15px; font-weight: 700; }
 .chip.on { background: var(--blue); color: var(--on); }
 .cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
-.card { width: 100%; height: 100%; min-height: 176px; padding: 12px; border-radius: 18px; display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; font-size: 16px; font-weight: 700; line-height: 1.35; background: var(--ok-bg); color: var(--ok); }
+.card { width: 100%; height: 100%; min-height: 176px; padding: 12px; border-radius: 24px; display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; font-size: 16px; font-weight: 700; line-height: 1.35; background: var(--ok-bg); color: var(--ok); }
 .card.warn { background: var(--no-bg); color: var(--no); }
 .card.now { outline: 3px solid var(--ink); }
 .card .pic { position: relative; width: 72px; height: 72px; flex: none; }
@@ -78,7 +82,7 @@ h1 { margin: 0; font-size: 28px; line-height: 1.25; font-weight: 800; text-wrap:
 .card .pic .no { position: absolute; inset: -4%; width: 108%; height: 108%; }
 .card .mark { font-size: 20px; font-weight: 800; }
 .phrases { display: flex; flex-direction: column; gap: 10px; }
-.phrase { width: 100%; min-height: 88px; padding: 12px 16px; border-radius: 18px; background: var(--surface); display: grid; grid-template-columns: minmax(0, 1fr) 36px; gap: 10px; align-items: center; text-align: left; }
+.phrase { width: 100%; min-height: 88px; padding: 12px 16px; border-radius: 24px; background: var(--surface); display: grid; grid-template-columns: minmax(0, 1fr) 36px; gap: 10px; align-items: center; text-align: left; }
 .phrase.first { background: #C8200F; color: var(--on); }
 .phrase strong { display: block; font-size: 20px; font-weight: 800; }
 .phrase svg { width: 32px; height: 32px; color: var(--blue); }
@@ -87,11 +91,11 @@ h1 { margin: 0; font-size: 28px; line-height: 1.25; font-weight: 800; text-wrap:
 .overlay { position: fixed; inset: 0; z-index: 30; padding: 24px max(24px, env(safe-area-inset-right, 0px)) 24px max(24px, env(safe-area-inset-left, 0px)); background: var(--stage); color: var(--on); display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 24px; text-align: center; }
 .overlay p { margin: 0; font-size: clamp(38px, 11vw, 64px); line-height: 1.2; font-weight: 800; }
 .overlay button { min-height: 56px; padding: 0 28px; border-radius: 28px; background: var(--on); color: var(--ink); font-weight: 800; }
-.tabs { position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); background: var(--surface); border-top: 1px solid #D5DCE6; padding-bottom: env(safe-area-inset-bottom, 0px); padding-left: env(safe-area-inset-left, 0px); padding-right: env(safe-area-inset-right, 0px); }
+.tabs { position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); background: var(--surface); border-top: 1px solid #EFD9BC; padding-bottom: env(safe-area-inset-bottom, 0px); padding-left: env(safe-area-inset-left, 0px); padding-right: env(safe-area-inset-right, 0px); }
 .tabs button { min-height: 68px; text-align: center; color: var(--muted); font-weight: 700; }
 .tabs button.on { color: var(--blue); font-weight: 800; box-shadow: inset 0 3px 0 var(--blue); }
 .langs { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
-.lang { width: 100%; min-height: 72px; padding: 10px 18px; border-radius: 18px; background: var(--surface); color: var(--ink); display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.lang { width: 100%; min-height: 72px; padding: 10px 18px; border-radius: 24px; background: var(--surface); color: var(--ink); display: flex; justify-content: space-between; align-items: center; gap: 12px; }
 .lang.on { outline: 3px solid var(--ink); }
 .lang strong { font-size: 24px; font-weight: 800; }
 .lang small { font-size: 15px; }
@@ -264,6 +268,7 @@ const UI2 = {
   th: { work: "งานของฉัน", tabV: "วิดีโองาน", tabT: "ประโยคหน้างาน", sound: "เสียง", caption: "คำบรรยาย", off: "ปิด", to: "ภาษาของอีกฝ่าย", tapHint: "แตะเพื่อแสดงตัวอักษรใหญ่และเล่นเสียง", close: "ปิด" },
   ru: { work: "Моя работа", tabV: "Видео о работе", tabT: "Фразы на стройке", sound: "Звук", caption: "Субтитры", off: "Выкл.", to: "Язык собеседника", tapHint: "Нажмите: крупный текст и звук.", close: "Закрыть" }
 };
+const HELLO = { ko: "오늘도 안전하게 퇴근해요", zh: "今天也要平安下班", vi: "Hôm nay cũng tan ca an toàn nhé", th: "วันนี้ก็กลับบ้านอย่างปลอดภัยนะ", ru: "Пусть сегодня всё пройдёт безопасно" };
 const PHRASES = {
   ko: ["멈추세요!", "위험합니다. 비키세요.", "안전모를 쓰세요.", "여기는 들어가면 안 됩니다.", "다쳤어요. 도와주세요.", "119를 불러 주세요."],
   zh: ["停下！", "危险，请让开。", "请戴好安全帽。", "这里不能进入。", "我受伤了，请帮帮我。", "请拨打119。"],
@@ -315,7 +320,7 @@ function langBtn() { return `<button class="langbtn" data-picker>${LANGS.find(l 
 function home() {
   stop(); cur = null; page("home"); showTabs("v");
   const seen = store.get();
-  app.innerHTML = `<div class="top"><h1>${u2().work}</h1>${langBtn()}</div>
+  app.innerHTML = `<div class="hero">${langBtn()}<h1>${HELLO[lang]}</h1><p>${u().head}</p></div>
     <div class="tiles">${TASKS.map(x => `<button class="tile" data-go="${x.id}">${svg(x.icon)}<span>${x.lname}</span>${seen.includes(x.id) ? `<span class="seen">✓ ${u().seen}</span>` : ""}</button>`).join("")}</div>${note()}`;
 }
 function picker() {
