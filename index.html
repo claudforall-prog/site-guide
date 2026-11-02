@@ -99,6 +99,28 @@ html:not(:lang(ko)) .hero h1 { font-family: var(--font); font-weight: 800; font-
 .lang.on { outline: 3px solid var(--ink); }
 .lang strong { font-size: 24px; font-weight: 800; }
 .lang small { font-size: 15px; }
+.hazard { background: var(--surface); border-radius: 24px; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+.hz-top { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+.hz-top strong { font-size: 20px; font-weight: 800; color: var(--no); }
+.hz-top small { font-size: 14px; color: var(--muted); white-space: nowrap; }
+.hz { width: 100%; min-height: 60px; padding: 8px 12px; border-radius: 16px; background: var(--no-bg); color: var(--ink); display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 10px; align-items: center; text-align: left; font-weight: 700; }
+.hz-ic svg { width: 40px; height: 40px; color: var(--no); display: block; }
+.hz-ok { min-height: 52px; border-radius: 14px; background: var(--blue); color: var(--on); text-align: center; font-weight: 800; }
+.hz-done { margin: 0; color: var(--ok); font-weight: 700; }
+.checks { display: flex; flex-direction: column; gap: 12px; }
+.check { background: var(--surface); border-radius: 22px; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.check strong { font-size: 20px; font-weight: 800; }
+.yn { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.yn button { min-height: 60px; border-radius: 16px; text-align: center; font-size: 19px; font-weight: 800; }
+.yn .y { background: var(--ok-bg); color: var(--ok); }
+.yn .y.on { background: var(--ok); color: var(--on); }
+.yn .n { background: var(--no-bg); color: var(--no); }
+.watch { min-height: 56px; border-radius: 16px; border: 2px solid currentColor; text-align: center; font-weight: 700; width: 100%; }
+body.stop { background: #A8200F; color: var(--on); }
+.stopbox { min-height: 80vh; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 16px; text-align: center; }
+.stopbox svg { width: 120px; height: 120px; color: var(--on); }
+.stopbox h1 { color: var(--on); font-size: 36px; }
+.stopbox p { margin: 0; font-size: 20px; font-weight: 700; }
 @keyframes pop { from { transform: scale(.85); opacity: .3; } to { transform: scale(1); opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .art { animation: none; } }
 </style>
@@ -261,6 +283,87 @@ function localize() {
   });
 }
 
+/* 1단계: 고위험 작업, 작업 전 확인, 오늘의 위험 */
+Object.assign(ICON, {
+  scaffold: `<path ${S} d="M14 6v52M50 6v52M14 22h36M14 42h36M14 22l36 20"/><path ${S} d="M8 58h48"/>`,
+  flame: `<path ${S} d="M32 6c4 12 16 18 16 32a16 16 0 0 1-32 0c0-8 4-12 8-16 0 6 3 8 5 8 2-8 0-16 3-24z"/>`,
+  bolt: `<path ${S} d="M36 6L14 36h16l-4 22 24-32H34z"/>`,
+  dig: `<path ${S} d="M6 22h14l6 30h12l6-30h14"/><path ${S} d="M32 6v28M24 26l8 8 8-8"/>`,
+  gas: `<path ${S} d="M10 58V30a22 22 0 0 1 44 0v28z"/><path ${S} d="M22 44c4-4 6 4 10 0s6 4 10 0M22 32c4-4 6 4 10 0s6 4 10 0"/>`,
+  guard: `<path ${S} d="M8 56V18M32 56V18M56 56V18M8 18h48M8 36h48M4 56h56"/>`
+});
+TASKS.push(
+  { id: "opening", name: "개구부 주변 작업", desc: "바닥 구멍, 건물 끝", icon: "hole",
+    steps: [["guard", "작업 전에 난간과 덮개가 제대로 있는지 확인합니다."], ["vest", "난간이나 덮개를 열어야 하면 관리자 승인을 먼저 받습니다."], ["ladder", "덮개를 연 동안에는 안전대를 튼튼한 곳에 겁니다."], ["hole", "작업이 끝나면 바로 덮개와 난간을 원래대로 돌려놓습니다."]],
+    warns: [["hole", "덮개를 말없이 치우거나 열어 두지 마세요.", true], ["box", "덮개 위나 건물 끝에 자재를 쌓지 마세요.", true], ["blind", "뒷걸음질하며 작업하지 마세요. 발밑을 먼저 보세요.", true]] },
+  { id: "scaffold", name: "비계 위 작업", desc: "높은 곳 발판 작업", icon: "scaffold",
+    steps: [["scaffold", "올라가기 전에 발판과 난간이 빠진 곳이 없는지 봅니다."], ["ladder", "정해진 승강 통로로 오르내립니다."], ["vest", "안전대를 차고, 필요한 곳에서는 고리를 겁니다."], ["box", "발판 위에는 정해진 무게만 올립니다."]],
+    warns: [["guard", "작업이 불편해도 난간이나 발판을 임의로 풀지 마세요.", true], ["ladder", "비계 기둥을 타고 오르내리지 마세요.", true], ["box", "위에서 물건을 던지지 마세요.", true]] },
+  { id: "hot", name: "용접·절단 작업", desc: "불꽃이 튀는 작업", icon: "flame",
+    steps: [["vest", "작업 허가를 받았는지 관리자에게 확인합니다."], ["sort", "주변의 스티로폼, 단열재 등 불에 타는 물건을 치웁니다."], ["flame", "불티 방지포를 깔고 소화기를 바로 옆에 둡니다."], ["eye", "화재감시자가 있는지 확인하고, 끝난 뒤에도 불씨를 다시 살핍니다."]],
+    warns: [["blind", "화재감시자 없이 불꽃 작업을 시작하지 마세요.", true], ["flame", "연기가 나면 끄려고 머물지 말고 소리치며 대피하세요."], ["gas", "연기를 마시면 위험합니다. 낮은 자세로 출구로 가세요."]] },
+  { id: "electric", name: "전기·양수기 작업", desc: "전선, 펌프 점검", icon: "bolt",
+    steps: [["vest", "자격이 있는 사람만 작업합니다."], ["bolt", "만지기 전에 전원을 끕니다."], ["talk", "차단기에 잠금과 작업 중 표지를 걸어 다른 사람이 켜지 못하게 합니다."], ["hands", "전기가 정말 끊겼는지 검전기로 확인합니다."]],
+    warns: [["water", "젖은 손이나 물이 고인 곳에서 전기 장비를 만지지 마세요.", true], ["cable", "껍질이 벗겨진 전선을 보면 만지지 말고 알리세요.", true], ["people", "감전된 사람을 맨손으로 만지지 마세요. 먼저 전원을 끄세요.", true]] },
+  { id: "excavate", name: "땅파기 주변 작업", desc: "흙막이, 굴착기 주변", icon: "dig",
+    steps: [["dig", "들어가기 전에 흙막이와 경사면 상태를 살펴봅니다."], ["ladder", "정해진 사다리나 통로로 드나듭니다."], ["baton", "굴착기가 움직이는 범위 밖에 있습니다."], ["talk", "신호수의 신호를 확인하고 움직입니다."]],
+    warns: [["box", "파낸 가장자리에 흙이나 자재를 쌓지 마세요.", true], ["dig", "금이 가거나 흙이 흘러내리면 바로 나와서 알리세요."], ["truck", "장비 작업 범위 안으로 들어가지 마세요.", true]] },
+  { id: "confined", name: "맨홀·밀폐공간 작업", desc: "맨홀, 탱크, 지하 공간", icon: "gas",
+    steps: [["vest", "작업 허가를 받았는지 확인합니다."], ["gas", "들어가기 전에 산소와 유해가스를 측정합니다."], ["water", "작업하는 동안 계속 환기합니다."], ["people", "밖에서 지켜보는 감시인을 두고 연락을 유지합니다."]],
+    warns: [["gas", "측정 없이 들어가지 마세요.", true], ["people", "쓰러진 동료를 구하러 그냥 들어가지 마세요. 바로 119에 알리세요.", true], ["health", "어지럽거나 숨이 차면 바로 밖으로 나오세요."]] }
+);
+const ORDER = ["gear", "opening", "scaffold", "ladder", "hot", "electric", "excavate", "confined", "signal", "carry", "concrete", "clean"];
+TASKS.sort((a, b) => ORDER.indexOf(a.id) - ORDER.indexOf(b.id));
+Object.assign(I18N.zh, {
+  opening: ["洞口周边作业", "地面洞口、楼层边缘", ["作业前确认栏杆和盖板是否完好。", "需要打开栏杆或盖板时，先取得管理人员批准。", "盖板打开期间，把安全带挂在牢固的地方。", "作业结束后，立即恢复盖板和栏杆。"], ["不要擅自移开盖板或让它一直开着。", "不要在盖板上或楼层边缘堆放材料。", "不要倒退着作业，先看脚下。"]],
+  scaffold: ["脚手架作业", "高处踏板作业", ["上去之前，检查踏板和栏杆有没有缺失。", "从指定的上下通道上下。", "系好安全带，需要时挂好挂钩。", "踏板上只放规定重量的物品。"], ["即使不方便，也不要擅自拆除栏杆或踏板。", "不要攀爬脚手架立杆上下。", "不要从高处扔东西。"]],
+  hot: ["焊接与切割作业", "有火花的作业", ["向管理人员确认是否已取得作业许可。", "清走周围的泡沫板、保温材料等易燃物。", "铺好防火布，把灭火器放在旁边。", "确认有火灾监护人，结束后再次检查火星。"], ["没有火灾监护人时，不要开始动火作业。", "冒烟时不要留下灭火，请大声呼喊并撤离。", "吸入烟雾很危险，请放低身体走向出口。"]],
+  electric: ["电气与水泵作业", "电线、水泵检查", ["只有具备资格的人才能作业。", "接触之前先切断电源。", "在断路器上挂锁和作业标牌，防止别人合闸。", "用验电器确认确实已断电。"], ["不要用湿手或在积水处接触电气设备。", "看到破皮的电线不要碰，请报告。", "不要徒手碰触电的人，先切断电源。"]],
+  excavate: ["开挖周边作业", "支护、挖掘机周边", ["进入之前，查看支护和边坡状态。", "从指定的梯子或通道进出。", "待在挖掘机活动范围之外。", "确认信号员的信号后再移动。"], ["不要在开挖边缘堆放土或材料。", "出现裂缝或土流下时，立即出来并报告。", "不要进入设备作业范围。"]],
+  confined: ["井下与密闭空间作业", "检查井、罐体、地下空间", ["确认是否已取得作业许可。", "进入之前测量氧气和有害气体。", "作业期间持续通风。", "安排外部监护人并保持联系。"], ["未经测量不要进入。", "不要直接进去救倒下的同事，请马上拨打119。", "感到头晕或呼吸困难时，立即出来。"]]
+});
+Object.assign(I18N.vi, {
+  opening: ["Làm việc gần lỗ sàn", "Lỗ sàn, mép công trình", ["Trước khi làm, kiểm tra lan can và nắp che có đầy đủ không.", "Nếu cần mở lan can hoặc nắp che, phải được người quản lý cho phép trước.", "Trong khi mở nắp, móc dây an toàn vào chỗ chắc chắn.", "Làm xong, lắp lại nắp che và lan can ngay."], ["Không tự ý dời nắp che hoặc để nắp mở.", "Không chất vật liệu trên nắp che hoặc ở mép công trình.", "Không đi lùi khi làm việc. Hãy nhìn dưới chân trước."]],
+  scaffold: ["Làm việc trên giàn giáo", "Làm việc trên sàn thao tác cao", ["Trước khi lên, kiểm tra sàn thao tác và lan can có thiếu không.", "Lên xuống bằng lối đi quy định.", "Đeo dây an toàn và móc khóa ở nơi cần thiết.", "Chỉ đặt trên sàn đúng trọng lượng cho phép."], ["Dù bất tiện cũng không tự ý tháo lan can hoặc sàn thao tác.", "Không leo theo cột giàn giáo.", "Không ném đồ vật từ trên cao."]],
+  hot: ["Hàn và cắt", "Công việc có tia lửa", ["Hỏi người quản lý xem đã có giấy phép làm việc chưa.", "Dọn vật dễ cháy xung quanh như xốp, vật liệu cách nhiệt.", "Trải tấm chống tia lửa và để bình chữa cháy ngay bên cạnh.", "Xác nhận có người giám sát cháy, làm xong kiểm tra lại tàn lửa."], ["Không bắt đầu công việc có lửa khi không có người giám sát cháy.", "Khi có khói, đừng ở lại dập lửa. Hãy hô to và thoát ra.", "Hít khói rất nguy hiểm. Hãy cúi thấp và đi đến lối ra."]],
+  electric: ["Làm việc với điện và máy bơm", "Kiểm tra dây điện, máy bơm", ["Chỉ người có chứng chỉ mới được làm.", "Tắt nguồn điện trước khi chạm vào.", "Khóa cầu dao và treo biển để người khác không bật lại.", "Dùng bút thử điện để xác nhận đã mất điện."], ["Không chạm thiết bị điện khi tay ướt hoặc ở chỗ đọng nước.", "Thấy dây điện hở vỏ thì không chạm vào, hãy báo ngay.", "Không chạm tay trần vào người bị điện giật. Hãy tắt nguồn trước."]],
+  excavate: ["Làm việc gần hố đào", "Tường chắn đất, quanh máy xúc", ["Trước khi vào, xem tình trạng tường chắn và mái dốc.", "Ra vào bằng thang hoặc lối đi quy định.", "Ở ngoài phạm vi hoạt động của máy xúc.", "Xác nhận tín hiệu của người xi-nhan rồi mới di chuyển."], ["Không chất đất hoặc vật liệu ở mép hố đào.", "Nếu thấy nứt hoặc đất trôi, hãy ra ngay và báo.", "Không vào phạm vi làm việc của thiết bị."]],
+  confined: ["Hố ga và không gian kín", "Hố ga, bồn chứa, không gian ngầm", ["Xác nhận đã có giấy phép làm việc.", "Đo oxy và khí độc trước khi vào.", "Thông gió liên tục khi làm việc.", "Bố trí người giám sát bên ngoài và giữ liên lạc."], ["Không vào khi chưa đo khí.", "Đừng vào cứu đồng nghiệp bị ngất. Hãy gọi 119 ngay.", "Nếu chóng mặt hoặc khó thở, hãy ra ngoài ngay."]]
+});
+Object.assign(I18N.th, {
+  opening: ["งานใกล้ช่องเปิด", "ช่องเปิดบนพื้น ขอบอาคาร", ["ก่อนเริ่มงาน ตรวจว่าราวกันตกและฝาปิดอยู่ครบ", "ถ้าต้องเปิดราวหรือฝาปิด ให้ขออนุญาตผู้ดูแลก่อน", "ระหว่างเปิดฝา ให้เกี่ยวเข็มขัดนิรภัยกับจุดที่แข็งแรง", "เมื่อเสร็จงาน ให้ปิดฝาและติดราวกลับทันที"], ["อย่าย้ายฝาปิดเองหรือเปิดทิ้งไว้", "อย่ากองวัสดุบนฝาปิดหรือขอบอาคาร", "อย่าเดินถอยหลังขณะทำงาน ให้ดูพื้นก่อน"]],
+  scaffold: ["งานบนนั่งร้าน", "งานบนพื้นที่สูง", ["ก่อนขึ้น ตรวจว่าแผ่นพื้นและราวกันตกไม่ขาดหาย", "ขึ้นลงตามทางที่กำหนด", "สวมเข็มขัดนิรภัยและเกี่ยวตะขอในจุดที่จำเป็น", "วางของบนแผ่นพื้นไม่เกินน้ำหนักที่กำหนด"], ["แม้ไม่สะดวก ก็ห้ามถอดราวหรือแผ่นพื้นเอง", "อย่าปีนเสานั่งร้านขึ้นลง", "อย่าโยนของจากที่สูง"]],
+  hot: ["งานเชื่อมและตัด", "งานที่มีประกายไฟ", ["ถามผู้ดูแลว่าได้รับใบอนุญาตทำงานแล้วหรือยัง", "เก็บของไวไฟรอบ ๆ เช่น โฟม ฉนวนกันความร้อน", "ปูผ้ากันสะเก็ดไฟและวางถังดับเพลิงไว้ข้าง ๆ", "ตรวจว่ามีผู้เฝ้าระวังไฟ และตรวจลูกไฟอีกครั้งหลังเสร็จงาน"], ["อย่าเริ่มงานที่มีประกายไฟถ้าไม่มีผู้เฝ้าระวังไฟ", "ถ้ามีควัน อย่าอยู่ดับไฟ ให้ตะโกนบอกและหนีออกไป", "การสูดควันเป็นอันตราย ให้ก้มตัวต่ำแล้วไปที่ทางออก"]],
+  electric: ["งานไฟฟ้าและปั๊มน้ำ", "ตรวจสายไฟ ปั๊มน้ำ", ["ให้เฉพาะผู้มีคุณสมบัติเท่านั้นที่ทำงาน", "ปิดไฟก่อนแตะอุปกรณ์", "ล็อกเบรกเกอร์และแขวนป้ายเพื่อไม่ให้คนอื่นเปิด", "ใช้เครื่องทดสอบไฟยืนยันว่าไฟดับจริง"], ["อย่าแตะอุปกรณ์ไฟฟ้าด้วยมือเปียกหรือในที่มีน้ำขัง", "เห็นสายไฟฉนวนลอก อย่าแตะ ให้แจ้งทันที", "อย่าใช้มือเปล่าแตะคนที่ถูกไฟดูด ให้ปิดไฟก่อน"]],
+  excavate: ["งานใกล้บ่อขุด", "กำแพงกันดิน รอบรถขุด", ["ก่อนเข้า ตรวจสภาพกำแพงกันดินและลาดดิน", "เข้าออกตามบันไดหรือทางที่กำหนด", "อยู่นอกรัศมีการทำงานของรถขุด", "ดูสัญญาณจากคนให้สัญญาณก่อนเคลื่อนที่"], ["อย่ากองดินหรือวัสดุที่ขอบบ่อขุด", "ถ้าดินแตกร้าวหรือไหลลง ให้ออกมาและแจ้งทันที", "อย่าเข้าไปในรัศมีการทำงานของเครื่องจักร"]],
+  confined: ["งานบ่อพักและที่อับอากาศ", "บ่อพัก ถัง พื้นที่ใต้ดิน", ["ตรวจว่าได้รับใบอนุญาตทำงานแล้ว", "วัดออกซิเจนและก๊าซอันตรายก่อนเข้า", "ระบายอากาศตลอดเวลาที่ทำงาน", "ให้มีผู้เฝ้าระวังอยู่ข้างนอกและติดต่อกันตลอด"], ["อย่าเข้าไปถ้ายังไม่ได้วัดก๊าซ", "อย่าเข้าไปช่วยเพื่อนที่หมดสติเอง ให้โทร 119 ทันที", "ถ้าเวียนหัวหรือหายใจลำบาก ให้ออกมาทันที"]]
+});
+Object.assign(I18N.ru, {
+  opening: ["Работа у проёмов", "Проёмы в полу, край здания", ["Перед работой проверьте, на месте ли ограждения и щиты.", "Если нужно открыть ограждение или щит, сначала получите разрешение руководителя.", "Пока щит открыт, пристегните страховочную привязь к прочной опоре.", "После работы сразу верните щит и ограждение на место."], ["Не убирайте щит самовольно и не оставляйте проём открытым.", "Не складывайте материалы на щите и у края здания.", "Не работайте, двигаясь спиной вперёд. Сначала смотрите под ноги."]],
+  scaffold: ["Работа на лесах", "Работа на высоте", ["Перед подъёмом проверьте настил и ограждения.", "Поднимайтесь и спускайтесь по отведённому проходу.", "Наденьте страховочную привязь и пристёгивайтесь там, где нужно.", "Кладите на настил только допустимый вес."], ["Даже если неудобно, не снимайте ограждения и настил самовольно.", "Не лазайте по стойкам лесов.", "Не бросайте предметы с высоты."]],
+  hot: ["Сварка и резка", "Работы с искрами", ["Уточните у руководителя, есть ли разрешение на работу.", "Уберите рядом горючее: пенопласт, утеплитель.", "Постелите защиту от искр и поставьте рядом огнетушитель.", "Убедитесь, что есть наблюдатель за огнём, а после работы снова проверьте искры."], ["Не начинайте огневые работы без наблюдателя за огнём.", "При появлении дыма не оставайтесь тушить. Кричите и уходите.", "Дым опасен. Двигайтесь к выходу, пригнувшись."]],
+  electric: ["Электрика и насосы", "Проверка проводов и насосов", ["Работать может только человек с допуском.", "Перед работой отключите питание.", "Заблокируйте автомат и повесьте табличку, чтобы никто не включил.", "Проверьте указателем напряжения, что питания нет."], ["Не трогайте электрооборудование мокрыми руками или в воде.", "Не трогайте провод с повреждённой изоляцией, сообщите о нём.", "Не касайтесь голыми руками человека под током. Сначала отключите питание."]],
+  excavate: ["Работа у котлована", "Крепление стенок, рядом с экскаватором", ["Перед входом осмотрите крепление и склоны.", "Входите и выходите по отведённой лестнице или проходу.", "Оставайтесь вне зоны работы экскаватора.", "Двигайтесь только после сигнала сигнальщика."], ["Не складывайте грунт и материалы у края котлована.", "При трещинах или осыпании грунта сразу выйдите и сообщите.", "Не заходите в зону работы техники."]],
+  confined: ["Колодцы и замкнутые пространства", "Колодцы, ёмкости, подземные помещения", ["Убедитесь, что есть разрешение на работу.", "Перед входом измерьте кислород и вредные газы.", "Постоянно проветривайте во время работы.", "Оставьте снаружи наблюдателя и держите связь."], ["Не входите без замера газов.", "Не спускайтесь спасать упавшего коллегу. Сразу звоните 119.", "При головокружении или одышке сразу выйдите."]]
+});
+const CHECKS = {
+  opening: { ko: ["난간이나 덮개가 있나요?", "덮개를 열 때 승인을 받았나요?", "안전대를 걸 곳이 있나요?"], zh: ["有栏杆或盖板吗？", "打开盖板已获批准吗？", "有挂安全带的地方吗？"], vi: ["Có lan can hoặc nắp che không?", "Đã được phép mở nắp chưa?", "Có chỗ móc dây an toàn không?"], th: ["มีราวกันตกหรือฝาปิดไหม?", "ได้รับอนุญาตให้เปิดฝาแล้วหรือยัง?", "มีจุดเกี่ยวเข็มขัดนิรภัยไหม?"], ru: ["Есть ограждение или щит?", "Есть разрешение открыть щит?", "Есть куда пристегнуть привязь?"] },
+  scaffold: { ko: ["발판과 난간이 다 있나요?", "안전대를 찼나요?", "승강 통로가 있나요?"], zh: ["踏板和栏杆都有吗？", "系好安全带了吗？", "有上下通道吗？"], vi: ["Sàn thao tác và lan can có đủ không?", "Đã đeo dây an toàn chưa?", "Có lối lên xuống không?"], th: ["แผ่นพื้นและราวกันตกครบไหม?", "สวมเข็มขัดนิรภัยแล้วหรือยัง?", "มีทางขึ้นลงไหม?"], ru: ["Настил и ограждения на месте?", "Привязь надета?", "Есть проход для подъёма?"] },
+  ladder: { ko: ["사다리가 부러진 곳 없이 튼튼한가요?", "바닥이 평평하고 고정했나요?", "잡아 줄 동료가 있나요?"], zh: ["梯子完好牢固吗？", "地面平整并已固定吗？", "有同事帮忙扶梯吗？"], vi: ["Thang có chắc chắn, không hỏng không?", "Nền phẳng và đã cố định chưa?", "Có đồng nghiệp giữ thang không?"], th: ["บันไดแข็งแรงไม่หักใช่ไหม?", "พื้นเรียบและยึดแล้วหรือยัง?", "มีเพื่อนช่วยจับบันไดไหม?"], ru: ["Лестница цела и прочна?", "Основание ровное, лестница закреплена?", "Есть коллега, который её держит?"] },
+  hot: { ko: ["작업 허가를 받았나요?", "화재감시자가 있나요?", "소화기와 불티 방지포가 있나요?"], zh: ["已取得作业许可吗？", "有火灾监护人吗？", "有灭火器和防火布吗？"], vi: ["Đã có giấy phép làm việc chưa?", "Có người giám sát cháy không?", "Có bình chữa cháy và tấm chống tia lửa không?"], th: ["ได้รับใบอนุญาตทำงานแล้วหรือยัง?", "มีผู้เฝ้าระวังไฟไหม?", "มีถังดับเพลิงและผ้ากันสะเก็ดไฟไหม?"], ru: ["Есть разрешение на работу?", "Есть наблюдатель за огнём?", "Есть огнетушитель и защита от искр?"] },
+  electric: { ko: ["전원을 껐나요?", "차단기에 잠금과 표지를 걸었나요?", "주변에 물이 없나요?"], zh: ["已切断电源吗？", "断路器上挂锁和标牌了吗？", "周围没有积水吗？"], vi: ["Đã tắt nguồn chưa?", "Đã khóa cầu dao và treo biển chưa?", "Xung quanh không có nước đúng không?"], th: ["ปิดไฟแล้วหรือยัง?", "ล็อกเบรกเกอร์และแขวนป้ายแล้วหรือยัง?", "รอบ ๆ ไม่มีน้ำใช่ไหม?"], ru: ["Питание отключено?", "Автомат заблокирован, табличка висит?", "Рядом нет воды?"] },
+  excavate: { ko: ["흙막이나 경사면에 금이 없나요?", "드나드는 통로가 있나요?", "신호수가 있나요?"], zh: ["支护和边坡没有裂缝吗？", "有进出通道吗？", "有信号员吗？"], vi: ["Tường chắn và mái dốc không có vết nứt đúng không?", "Có lối ra vào không?", "Có người xi-nhan không?"], th: ["กำแพงกันดินและลาดดินไม่มีรอยแตกใช่ไหม?", "มีทางเข้าออกไหม?", "มีคนให้สัญญาณไหม?"], ru: ["На креплении и склонах нет трещин?", "Есть проход для входа и выхода?", "Есть сигнальщик?"] },
+  confined: { ko: ["산소와 가스를 측정했나요?", "환기를 하고 있나요?", "밖에 감시인이 있나요?"], zh: ["已测量氧气和气体吗？", "正在通风吗？", "外面有监护人吗？"], vi: ["Đã đo oxy và khí chưa?", "Có đang thông gió không?", "Bên ngoài có người giám sát không?"], th: ["วัดออกซิเจนและก๊าซแล้วหรือยัง?", "กำลังระบายอากาศอยู่ไหม?", "มีผู้เฝ้าระวังอยู่ข้างนอกไหม?"], ru: ["Кислород и газы измерены?", "Идёт проветривание?", "Снаружи есть наблюдатель?"] },
+  signal: { ko: ["기사와 신호를 맞췄나요?", "기사가 나를 볼 수 있나요?", "주변 사람을 막았나요?"], zh: ["和司机约定信号了吗？", "司机能看到您吗？", "已阻止周围人员进入吗？"], vi: ["Đã thống nhất tín hiệu với tài xế chưa?", "Tài xế có nhìn thấy bạn không?", "Đã chặn người xung quanh chưa?"], th: ["ตกลงสัญญาณกับคนขับแล้วหรือยัง?", "คนขับมองเห็นคุณไหม?", "กันคนรอบ ๆ แล้วหรือยัง?"], ru: ["Сигналы с водителем согласованы?", "Водитель вас видит?", "Людей рядом не пускаете?"] }
+};
+const UI3 = {
+  ko: { today: "오늘 우리 현장 위험", sample: "예시 현장", h1: "3층 개구부 작업", h2: "오후 2시 지하 용접 작업", ok: "확인했어요", done: "오늘 위험을 확인했어요", checkT: "시작 전에 확인하세요", yes: "예", no: "아니요", stopT: "작업을 멈추세요", stopB: "시작하지 말고 관리자에게 바로 알리세요. 안전해진 뒤에 시작하세요.", watch: "영상만 보기", other: "다른 작업 고르기" },
+  zh: { today: "今天本现场的危险", sample: "示例现场", h1: "3楼洞口作业", h2: "下午2点地下焊接作业", ok: "我已确认", done: "已确认今天的危险", checkT: "开始前请确认", yes: "是", no: "否", stopT: "请停止作业", stopB: "不要开始，请马上告诉管理人员。确认安全后再开始。", watch: "只看视频", other: "选择其他工作" },
+  vi: { today: "Nguy hiểm hôm nay tại công trường", sample: "Công trường mẫu", h1: "Làm việc ở lỗ sàn tầng 3", h2: "Hàn ở tầng hầm lúc 2 giờ chiều", ok: "Tôi đã xem", done: "Đã xác nhận nguy hiểm hôm nay", checkT: "Kiểm tra trước khi bắt đầu", yes: "Có", no: "Không", stopT: "Hãy dừng công việc", stopB: "Đừng bắt đầu, hãy báo người quản lý ngay. Chỉ làm khi đã an toàn.", watch: "Chỉ xem video", other: "Chọn công việc khác" },
+  th: { today: "อันตรายวันนี้ที่หน้างาน", sample: "หน้างานตัวอย่าง", h1: "งานช่องเปิดชั้น 3", h2: "งานเชื่อมชั้นใต้ดิน บ่าย 2 โมง", ok: "รับทราบแล้ว", done: "รับทราบอันตรายของวันนี้แล้ว", checkT: "ตรวจสอบก่อนเริ่มงาน", yes: "ใช่", no: "ไม่", stopT: "หยุดงาน", stopB: "อย่าเริ่มงาน ให้แจ้งผู้ดูแลทันที เริ่มเมื่อปลอดภัยแล้วเท่านั้น", watch: "ดูวิดีโออย่างเดียว", other: "เลือกงานอื่น" },
+  ru: { today: "Опасности сегодня на стройке", sample: "Пример стройки", h1: "Работа у проёма на 3 этаже", h2: "Сварка в подвале в 14:00", ok: "Я ознакомлен", done: "Опасности на сегодня подтверждены", checkT: "Проверьте перед началом", yes: "Да", no: "Нет", stopT: "Остановите работу", stopB: "Не начинайте и сразу сообщите руководителю. Начинайте только когда безопасно.", watch: "Только видео", other: "Выбрать другую работу" }
+};
+const dayKey = () => "hazard-" + new Date().toISOString().slice(0, 10);
 const UI2 = {
   ko: { work: "내 작업", tabV: "작업 영상", tabT: "현장 말하기", sound: "소리", caption: "자막", off: "끄기", to: "상대방 언어", tapHint: "누르면 큰 글자와 소리로 나옵니다.", close: "닫기" },
   zh: { work: "我的工作", tabV: "作业视频", tabT: "现场用语", sound: "声音", caption: "字幕", off: "关闭", to: "对方语言", tapHint: "点击后显示大字并播放声音。", close: "关闭" },
@@ -321,7 +424,32 @@ function home() {
   stop(); cur = null; page("home"); showTabs("v");
   const seen = store.get();
   app.innerHTML = `<div class="hero">${langBtn()}<h1>${HELLO[lang]}</h1><p>${u().head}</p></div>
+    ${hazardCard()}
     <div class="tiles">${TASKS.map(x => `<button class="tile" data-go="${x.id}">${svg(x.icon)}<span>${x.lname}</span>${seen.includes(x.id) ? `<span class="seen">✓ ${u().seen}</span>` : ""}</button>`).join("")}</div>${note()}`;
+}
+function hazardCard() {
+  const x = UI3[lang], seen = saved(dayKey());
+  return `<section class="hazard"><div class="hz-top"><strong>${x.today}</strong><small>${x.sample}</small></div>
+    <button class="hz" data-go="opening"><span class="hz-ic">${svg("hole")}</span><span>${x.h1}</span></button>
+    <button class="hz" data-go="hot"><span class="hz-ic">${svg("flame")}</span><span>${x.h2}</span></button>
+    ${seen ? `<p class="hz-done">✓ ${x.done}</p>` : `<button class="hz-ok" data-confirm>${x.ok}</button>`}</section>`;
+}
+let answers = [], skipGate = false;
+function checkView(task) {
+  stop(); cur = null; page("work"); showTabs("v");
+  const x = UI3[lang], q = CHECKS[task.id][lang];
+  app.innerHTML = `<div class="top"><button class="back" data-go="">${u().back}</button>${langBtn()}</div>
+    <h1>${task.lname}</h1><p class="hint">${x.checkT}</p>
+    <div class="checks">${q.map((s, i) => `<div class="check"><strong>${s}</strong><div class="yn"><button class="y ${answers[i] ? "on" : ""}" data-chk="${i}" data-v="y" aria-pressed="${!!answers[i]}">○ ${x.yes}</button><button class="n" data-chk="${i}" data-v="n">✕ ${x.no}</button></div></div>`).join("")}</div>
+    <button class="watch" data-watch>${x.watch}</button>`;
+}
+function stopView(task) {
+  page("stop"); tabs.hidden = true; hush();
+  const x = UI3[lang];
+  app.innerHTML = `<div class="stopbox"><svg viewBox="0 0 64 64" aria-hidden="true"><path d="M21 4h22l17 17v22L43 60H21L4 43V21z" fill="currentColor"/><path d="M20 32h24" stroke="#A8200F" stroke-width="8" stroke-linecap="round"/></svg>
+    <h1>${x.stopT}</h1><p>${x.stopB}</p>
+    <button class="watch" data-watch>${x.watch}</button><button class="watch" data-go="">${x.other}</button></div>`;
+  speak(x.stopT, lang);
 }
 function picker() {
   stop(); cur = null; page("home"); tabs.hidden = true;
@@ -380,7 +508,7 @@ function ended() {
 }
 function tick(now) {
   if (!playing) return;
-  t += (now - last) / 1000; last = now;
+  t += Math.max(0, (now - last) / 1000); last = now;
   if (t >= DURATION) { t = DURATION; playing = false; hush(); store.add(cur.id); draw(); ended(); return; }
   draw(); timer = requestAnimationFrame(tick);
 }
@@ -395,6 +523,15 @@ document.addEventListener("click", e => {
   if (c("#closeover")) { overlay.hidden = true; hush(); return; }
   if ((el = c("[data-lang]"))) { lang = el.dataset.lang; langStore.set(lang); subLang = null; subStore.set(null); soundLang = null; keep("sound", null); target = null; keep("target", null); route(); return; }
   if (c("[data-picker]")) { picker(); return; }
+  if (c("[data-confirm]")) { keep(dayKey(), "1"); home(); return; }
+  if ((el = c("[data-chk]"))) {
+    const task = TASKS.find(x => x.id === location.hash.slice(1));
+    if (el.dataset.v === "n") { stopView(task); return; }
+    answers[+el.dataset.chk] = true;
+    if (CHECKS[task.id][lang].every((_, i) => answers[i])) { skipGate = true; wantPlay = true; route(); return; }
+    checkView(task); return;
+  }
+  if (c("[data-watch]")) { skipGate = true; wantPlay = true; route(); return; }
   if ((el = c("[data-go]"))) {
     wantPlay = !!el.dataset.go && el.dataset.go !== "talk";
     if (location.hash.slice(1) === el.dataset.go) route(); else location.hash = el.dataset.go;
@@ -433,6 +570,8 @@ function route() {
   const h = location.hash.slice(1);
   if (h === "talk") { talk(); return; }
   const task = TASKS.find(x => x.id === h);
+  if (task && CHECKS[task.id] && wantPlay && !skipGate) { answers = []; wantPlay = false; checkView(task); return; }
+  skipGate = false;
   task ? detail(task) : home();
 }
 addEventListener("hashchange", route);
