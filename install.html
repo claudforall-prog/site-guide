@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1B64DA">
+<title>오늘의 작업 안내 설치</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gothic+A1:wght@500;700;800&display=swap">
+<style>
+:root { --blue: #1B64DA; --ink: #191F28; --muted: #4E5968; --ground: #F4F6FA; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--ground); color: var(--ink); font: 500 18px/1.5 "Gothic A1", "Apple SD Gothic Neo", sans-serif; word-break: keep-all; }
+main { max-width: 560px; margin: 0 auto; padding: 28px max(16px, env(safe-area-inset-right, 0px)) 40px max(16px, env(safe-area-inset-left, 0px)); display: flex; flex-direction: column; gap: 16px; }
+img { width: 88px; height: 88px; border-radius: 20px; }
+h1 { margin: 0; font-size: 30px; line-height: 1.25; font-weight: 800; }
+section { background: #fff; border-radius: 20px; padding: 20px; display: flex; flex-direction: column; gap: 12px; }
+h2 { margin: 0; font-size: 22px; font-weight: 800; }
+ol { margin: 0; padding-left: 24px; display: flex; flex-direction: column; gap: 8px; }
+.btn { min-height: 60px; border-radius: 16px; display: grid; place-items: center; background: var(--blue); color: #fff; font-size: 20px; font-weight: 800; text-decoration: none; text-align: center; padding: 8px 16px; }
+.btn.sub { background: #E3E9F2; color: var(--ink); }
+small { color: var(--muted); font-size: 15px; }
+</style>
+</head>
+<body>
+<main>
+  <img src="icon-192.png" alt="">
+  <h1>오늘의 작업 안내<br>설치하기</h1>
+  <section id="android">
+    <h2>삼성·안드로이드 폰</h2>
+    <a class="btn" href="https://github.com/claudforall-prog/site-guide/releases/download/app/site-guide.apk">앱 파일(APK) 받기</a>
+    <ol>
+      <li>버튼을 눌러 파일을 받습니다.</li>
+      <li>받은 파일을 열고 "설치"를 누릅니다.</li>
+      <li>허용을 묻는 창이 나오면 "이 출처 허용"을 켭니다.</li>
+    </ol>
+  </section>
+  <section id="iphone">
+    <h2>아이폰</h2>
+    <ol>
+      <li>이 페이지를 <strong>Safari</strong>에서 엽니다.</li>
+      <li>아래 버튼으로 앱을 엽니다.</li>
+      <li>공유 버튼을 누르고 "홈 화면에 추가"를 고릅니다.</li>
+    </ol>
+    <a class="btn sub" href="./">앱 열기</a>
+    <small>아이폰은 앱스토어 없이 파일로 설치할 수 없어서 이 방법을 씁니다.</small>
+  </section>
+</main>
+<script>
+if (/iPhone|iPad|iPod/.test(navigator.userAgent)) document.querySelector("main").insertBefore(document.getElementById("iphone"), document.getElementById("android"));
+</script>
+</body>
+</html>

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#ffc800">
+<meta name="theme-color" content="#1B64DA">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -15,120 +15,92 @@
 <title>오늘의 작업 안내</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans:wght@400;500;700;900&family=Noto+Sans+KR:wght@400;500;700;900&family=Noto+Sans+SC:wght@400;500;700;900&family=Noto+Sans+Thai:wght@400;500;700;900&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gothic+A1:wght@400;500;700;800&family=Noto+Sans:wght@400;500;700;800&family=Noto+Sans+SC:wght@400;500;700;800&family=Noto+Sans+Thai:wght@400;500;700;800&display=swap">
 <style>
-/* Layout: 한 손으로 쓰는 세로 한 줄 앱. 목록 → 영상 + 작업 순서 + 주의사항.
-   햇빛 아래에서 잘 보이도록 밝은 단일 테마로 고정하고, 현장 안전표지의 색 체계를 그대로 쓴다. */
+/* Layout: 그림 타일 → 영상과 O/X 그림 카드. 아래 탭에 현장 말하기. 햇빛 아래에서 잘 보이도록 밝은 단일 테마. */
 :root {
-  --bg: #f3f2ec;
-  --surface: #ffffff;
-  --ink: #17181a;
-  --muted: #595b60;
-  --line: #d6d5cc;
-  --safety: #ffc800;
-  --danger: #c8200f;
-  --danger-tint: #fdecea;
-  --go: #0b7a45;
-  --stage: #17181a;
-  --on-stage: #ffffff;
-  --display: "Black Han Sans", "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
-  --body: "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  --blue: #1B64DA; --ground: #F4F6FA; --surface: #FFFFFF; --ink: #191F28; --muted: #4E5968; --chip: #E3E9F2;
+  --ok: #0B5D35; --ok-bg: #E5F4EC; --no: #A8200F; --no-bg: #FFECEA; --stage: #191F28; --on: #FFFFFF;
+  --font: "Gothic A1", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
 }
+html:lang(zh) { --font: "Noto Sans SC", "PingFang SC", sans-serif; }
+html:lang(vi), html:lang(ru) { --font: "Noto Sans", Roboto, Arial, sans-serif; }
+html:lang(th) { --font: "Noto Sans Thai", Thonburi, Tahoma, sans-serif; }
 * { box-sizing: border-box; }
-body { background: var(--bg); color: var(--ink); font: 400 17px/1.55 var(--body); word-break: keep-all; }
-button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; text-align: left; }
-button:focus-visible, a:focus-visible { outline: 3px solid var(--danger); outline-offset: 2px; }
-.wrap { max-width: 620px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
-.stripe { height: 12px; background: repeating-linear-gradient(-45deg, var(--safety) 0 18px, var(--ink) 18px 36px); }
-header.top { background: var(--safety); }
-header.top .wrap { padding-block: 22px 20px; }
-h1 { font: 400 clamp(32px, 9vw, 44px)/1.15 var(--display); margin: 0; text-wrap: balance; }
-.sub { margin: 6px 0 0; font-weight: 500; }
-main .wrap { padding-block: 18px 32px; display: flex; flex-direction: column; gap: 22px; }
-
-.tasks { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
-.task { display: grid; grid-template-columns: 64px minmax(0, 1fr) auto; gap: 14px; align-items: center; width: 100%; min-height: 88px; padding: 12px 14px; background: var(--surface); border: 2px solid var(--ink); border-radius: 6px; }
-.task:hover { background: var(--safety); }
-.task .ic { width: 64px; height: 64px; display: grid; place-items: center; background: var(--safety); border-radius: 4px; }
-.task:hover .ic { background: var(--surface); }
-.task .ic svg { width: 46px; height: 46px; }
-.task strong { display: block; font-size: 20px; font-weight: 900; line-height: 1.3; }
-.task small { display: block; font-size: 15px; color: var(--muted); }
-.task:hover small { color: var(--ink); }
-.task .len { font-weight: 700; font-size: 15px; font-variant-numeric: tabular-nums; white-space: nowrap; }
-.task .seen { display: block; color: var(--go); font-size: 14px; font-weight: 700; text-align: right; }
-
-.back { display: inline-flex; align-items: center; min-height: 44px; font-weight: 700; }
-.player { background: var(--stage); color: var(--on-stage); border-radius: 6px; overflow: hidden; }
-.screen { position: relative; aspect-ratio: 16 / 10; max-width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 44px 16px 12px; text-align: center; }
-.screen video { position: absolute; inset: 0; width: 100%; height: 100%; background: #000; }
-.badge { position: absolute; top: 12px; left: 12px; padding: 2px 10px; border-radius: 3px; font-weight: 900; font-size: 15px; background: var(--safety); color: var(--ink); }
-.badge.warn { background: var(--danger); color: var(--on-stage); }
-.sample { position: absolute; top: 14px; right: 12px; font-size: 13px; opacity: .75; }
-.art { position: relative; flex: none; width: clamp(68px, 20vw, 130px); height: clamp(68px, 20vw, 130px); color: var(--on-stage); animation: pop .5s ease-out both, bob 2.4s ease-in-out .5s infinite; }
-.paused .art { animation-play-state: paused; }
-.art svg { width: 100%; height: 100%; }
-.art .no { position: absolute; inset: -6%; color: var(--danger); }
-.cap { margin: 0; font-size: clamp(18px, 5vw, 23px); font-weight: 700; line-height: 1.35; max-width: 26em; text-wrap: balance; }
-.big { position: absolute; inset: 0; display: grid; place-items: center; background: rgba(23,24,26,.62); width: 100%; font: 400 24px var(--display); text-align: center; color: var(--on-stage); }
-.controls { display: grid; grid-template-columns: 56px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 8px 12px 10px 8px; }
-.pp { width: 56px; height: 48px; display: grid; place-items: center; }
-.pp svg { width: 28px; height: 28px; fill: var(--on-stage); }
-.segs { display: flex; gap: 3px; height: 44px; align-items: center; }
-.seg { flex: 1; height: 44px; display: flex; align-items: center; min-width: 0; }
-.seg i { display: block; width: 100%; height: 8px; background: #55575c; position: relative; overflow: hidden; }
-.seg i b { position: absolute; inset: 0 auto 0 0; background: var(--safety); }
-.seg.warn i b { background: #ff6a55; }
-.time { font-variant-numeric: tabular-nums; font-size: 15px; font-weight: 500; white-space: nowrap; }
-
-h2 { font: 400 24px/1.25 var(--display); margin: 0 0 8px; }
-section > p.hint { margin: -4px 0 10px; color: var(--muted); font-size: 15px; }
-.rows { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
-.row { display: grid; grid-template-columns: 40px minmax(0, 1fr); gap: 12px; align-items: start; width: 100%; min-height: 60px; padding: 10px 12px; background: var(--surface); border: 1px solid var(--line); border-radius: 6px; }
-.row .n { width: 40px; height: 40px; display: grid; place-items: center; background: var(--ink); color: var(--safety); font: 400 21px var(--display); border-radius: 50%; }
-.row.warn { background: var(--danger-tint); border-color: var(--danger); }
-.row.warn .n { background: var(--danger); color: var(--on-stage); border-radius: 4px; }
-.row.on { outline: 3px solid var(--ink); outline-offset: -1px; }
-.row span.t { font-weight: 500; align-self: center; min-width: 0; }
-
-.note { font-size: 15px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 14px; }
+html, body { background: var(--ground); }
+body { min-height: 100vh; min-height: 100dvh; color: var(--ink); font: 400 17px/1.45 var(--font); overflow-wrap: anywhere; }
+html:lang(ko) body { word-break: keep-all; }
+body.home { background: var(--blue); }
+button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+button:focus-visible { outline: 3px solid #FFB800; outline-offset: 2px; }
+.wrap { max-width: 620px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 18px 104px; display: flex; flex-direction: column; gap: 14px; }
+.top { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+h1 { margin: 0; font-size: 28px; line-height: 1.25; font-weight: 800; text-wrap: balance; min-width: 0; }
+.home h1, .home .note, .home .note strong { color: var(--on); }
+.langbtn { flex: none; display: inline-flex; align-items: center; min-height: 44px; padding: 0 14px; border: 2px solid currentColor; border-radius: 22px; font-weight: 700; font-size: 16px; }
+.home .langbtn { color: var(--on); }
+.tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.tile { position: relative; min-height: 176px; padding: 14px 10px; border-radius: 22px; background: var(--surface); display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 10px; text-align: center; font-size: 20px; font-weight: 800; line-height: 1.25; }
+.tile svg { width: 88px; height: 88px; color: var(--blue); }
+.tile .seen { position: absolute; top: 10px; right: 12px; font-size: 14px; color: var(--ok); }
+.note { font-size: 15px; color: var(--muted); }
 .note p { margin: 0 0 6px; }
-.note strong { color: var(--ink); }
-html:lang(zh) { --body: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif; }
-html:lang(vi), html:lang(ru) { --body: "Noto Sans", Roboto, Arial, sans-serif; }
-html:lang(th) { --body: "Noto Sans Thai", Thonburi, Tahoma, sans-serif; }
-html:not(:lang(ko)) body { word-break: normal; overflow-wrap: anywhere; }
-html:not(:lang(ko)) h1, html:not(:lang(ko)) h2, html:not(:lang(ko)) .big, html:not(:lang(ko)) .row .n { font-family: var(--body); font-weight: 900; }
-.toprow { display: flex; justify-content: flex-end; margin-bottom: 8px; }
-.langbtn { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 12px; border: 2px solid var(--ink); border-radius: 4px; font-weight: 700; font-size: 16px; }
-.langbtn svg { width: 22px; height: 22px; }
+.back { align-self: flex-start; min-height: 44px; font-weight: 700; }
+.player { background: var(--stage); color: var(--on); border-radius: 16px; overflow: hidden; }
+.screen { position: relative; aspect-ratio: 16 / 10; max-width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 44px 14px 12px; text-align: center; }
+.badge { position: absolute; top: 12px; left: 12px; padding: 2px 10px; border-radius: 6px; font-weight: 800; font-size: 15px; background: var(--blue); }
+.badge.warn { background: #C8200F; }
+.sample { position: absolute; top: 14px; right: 12px; font-size: 13px; }
+.art { position: relative; flex: none; width: clamp(68px, 20vw, 130px); height: clamp(68px, 20vw, 130px); animation: pop .4s ease-out both; }
+.art svg { width: 100%; height: 100%; }
+.art .no { position: absolute; inset: -6%; color: #FF5B47; }
+.cap { margin: 0; font-size: clamp(18px, 5vw, 22px); font-weight: 700; line-height: 1.35; text-wrap: balance; }
+.big { position: absolute; inset: 0; width: 100%; display: grid; place-items: center; background: rgba(25,31,40,.7); font-size: 24px; font-weight: 800; text-align: center; color: var(--on); }
+.controls { display: grid; grid-template-columns: 52px minmax(0, 1fr) auto; gap: 8px; align-items: center; padding: 6px 12px 6px 6px; }
+.pp { width: 52px; height: 48px; display: grid; place-items: center; }
+.pp svg { width: 28px; height: 28px; fill: var(--on); }
+.segs { display: flex; gap: 3px; }
+.seg { flex: 1; height: 44px; display: flex; align-items: center; min-width: 0; }
+.seg i { display: block; width: 100%; height: 8px; background: #5A6472; position: relative; overflow: hidden; }
+.seg i b { position: absolute; inset: 0 auto 0 0; background: #6FA5FF; }
+.seg.warn i b { background: #FF8A7A; }
+.time { font-variant-numeric: tabular-nums; font-size: 15px; white-space: nowrap; }
+.media { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 8px 10px; align-items: center; font-weight: 700; font-size: 15px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { min-height: 40px; padding: 0 12px; border-radius: 20px; background: var(--chip); font-size: 15px; font-weight: 700; }
+.chip.on { background: var(--blue); color: var(--on); }
+.cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.card { width: 100%; height: 100%; min-height: 176px; padding: 12px; border-radius: 18px; display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; font-size: 16px; font-weight: 700; line-height: 1.35; background: var(--ok-bg); color: var(--ok); }
+.card.warn { background: var(--no-bg); color: var(--no); }
+.card.now { outline: 3px solid var(--ink); }
+.card .pic { position: relative; width: 72px; height: 72px; flex: none; }
+.card .pic > svg:first-child { width: 100%; height: 100%; }
+.card .pic .no { position: absolute; inset: -4%; width: 108%; height: 108%; }
+.card .mark { font-size: 20px; font-weight: 800; }
+.phrases { display: flex; flex-direction: column; gap: 10px; }
+.phrase { width: 100%; min-height: 88px; padding: 12px 16px; border-radius: 18px; background: var(--surface); display: grid; grid-template-columns: minmax(0, 1fr) 36px; gap: 10px; align-items: center; text-align: left; }
+.phrase.first { background: #C8200F; color: var(--on); }
+.phrase strong { display: block; font-size: 20px; font-weight: 800; }
+.phrase svg { width: 32px; height: 32px; color: var(--blue); }
+.phrase.first svg { color: var(--on); }
+.hint { margin: 0; color: var(--muted); font-size: 16px; }
+.overlay { position: fixed; inset: 0; z-index: 30; padding: 24px max(24px, env(safe-area-inset-right, 0px)) 24px max(24px, env(safe-area-inset-left, 0px)); background: var(--stage); color: var(--on); display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 24px; text-align: center; }
+.overlay p { margin: 0; font-size: clamp(38px, 11vw, 64px); line-height: 1.2; font-weight: 800; }
+.overlay button { min-height: 56px; padding: 0 28px; border-radius: 28px; background: var(--on); color: var(--ink); font-weight: 800; }
+.tabs { position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); background: var(--surface); border-top: 1px solid #D5DCE6; padding-bottom: env(safe-area-inset-bottom, 0px); padding-left: env(safe-area-inset-left, 0px); padding-right: env(safe-area-inset-right, 0px); }
+.tabs button { min-height: 68px; text-align: center; color: var(--muted); font-weight: 700; }
+.tabs button.on { color: var(--blue); font-weight: 800; box-shadow: inset 0 3px 0 var(--blue); }
 .langs { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
-.lang { display: flex; justify-content: space-between; align-items: center; gap: 12px; width: 100%; min-height: 72px; padding: 10px 18px; background: var(--surface); border: 2px solid var(--ink); border-radius: 6px; }
-.lang:hover, .lang.on { background: var(--safety); }
-.lang strong { font-size: 24px; font-weight: 900; }
-.lang small { font-size: 15px; color: var(--ink); font-family: "Noto Sans KR", sans-serif; }
-.cap { font-family: "Noto Sans KR", "Noto Sans SC", "Noto Sans Thai", "Noto Sans", sans-serif; word-break: normal; overflow-wrap: anywhere; }
-.cap:lang(ko) { word-break: keep-all; }
-.cap:lang(zh) { font-family: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif; }
-.cap:lang(th) { font-family: "Noto Sans Thai", Thonburi, Tahoma, sans-serif; }
-.cap:lang(vi), .cap:lang(ru) { font-family: "Noto Sans", Roboto, Arial, sans-serif; }
-.subs { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding: 10px 12px 12px; border-top: 1px solid #3a3c40; }
-.subs > span { font-weight: 700; font-size: 15px; margin-right: 4px; }
-.chip { min-height: 40px; padding: 0 12px; border: 1px solid #8a8c90; border-radius: 4px; font-size: 15px; font-weight: 500; color: var(--on-stage); }
-.chip.on { background: var(--safety); border-color: var(--safety); color: var(--ink); font-weight: 700; }
-@keyframes pop { from { transform: scale(.8); opacity: .3; } to { transform: scale(1); opacity: 1; } }
-@keyframes bob { 50% { transform: translateY(-5px); } }
+.lang { width: 100%; min-height: 72px; padding: 10px 18px; border-radius: 18px; background: var(--surface); color: var(--ink); display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.lang.on { outline: 3px solid var(--ink); }
+.lang strong { font-size: 24px; font-weight: 800; }
+.lang small { font-size: 15px; }
+@keyframes pop { from { transform: scale(.85); opacity: .3; } to { transform: scale(1); opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .art { animation: none; } }
 </style>
-
-<div class="stripe"></div>
-<header class="top"><div class="wrap">
-  <div class="toprow"><button class="langbtn" id="langbtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 4 6 4 9s-1 6-4 9c-3-3-4-6-4-9s1-6 4-9z"/></svg><span id="langname">한국어</span></button></div>
-  <h1 id="head">오늘 무슨 일을 하세요?</h1>
-  <p class="sub" id="subhead">내 작업을 누르면 1분 영상이 바로 나옵니다.</p>
-</div></header>
-<main><div class="wrap" id="app"></div></main>
-
+<main class="wrap" id="app"></main>
+<nav class="tabs" id="tabs" hidden></nav>
+<div class="overlay" id="overlay" hidden></div>
 <script>
 /* 그림 아이콘 — 실제 영상을 넣기 전까지 샘플 영상의 화면으로 쓴다 */
 const S = 'fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"';
@@ -274,7 +246,6 @@ let lang = langStore.get();
 const u = () => UI[lang || "ko"];
 function localize() {
   document.documentElement.lang = lang || "ko";
-  document.getElementById("langname").textContent = LANGS.find(l => l.id === (lang || "ko")).name;
   TASKS.forEach(t => {
     const o = (I18N[lang] || {})[t.id];
     t.lname = o ? o[0] : t.name;
@@ -286,68 +257,100 @@ function localize() {
   });
 }
 
-const DURATION = 60;
-const app = document.getElementById("app");
-const store = {
-  get() { try { return JSON.parse(localStorage.getItem("seen") || "[]"); } catch (e) { return []; } },
-  add(id) { try { const s = new Set(store.get()); s.add(id); localStorage.setItem("seen", JSON.stringify([...s])); } catch (e) {} }
+const UI2 = {
+  ko: { work: "내 작업", tabV: "작업 영상", tabT: "현장 말하기", sound: "소리", caption: "자막", off: "끄기", to: "상대방 언어", tapHint: "누르면 큰 글자와 소리로 나옵니다.", close: "닫기" },
+  zh: { work: "我的工作", tabV: "作业视频", tabT: "现场用语", sound: "声音", caption: "字幕", off: "关闭", to: "对方语言", tapHint: "点击后显示大字并播放声音。", close: "关闭" },
+  vi: { work: "Công việc của tôi", tabV: "Video công việc", tabT: "Câu nói tại công trường", sound: "Âm thanh", caption: "Phụ đề", off: "Tắt", to: "Ngôn ngữ người nghe", tapHint: "Chạm để hiện chữ lớn và phát âm thanh.", close: "Đóng" },
+  th: { work: "งานของฉัน", tabV: "วิดีโองาน", tabT: "ประโยคหน้างาน", sound: "เสียง", caption: "คำบรรยาย", off: "ปิด", to: "ภาษาของอีกฝ่าย", tapHint: "แตะเพื่อแสดงตัวอักษรใหญ่และเล่นเสียง", close: "ปิด" },
+  ru: { work: "Моя работа", tabV: "Видео о работе", tabT: "Фразы на стройке", sound: "Звук", caption: "Субтитры", off: "Выкл.", to: "Язык собеседника", tapHint: "Нажмите: крупный текст и звук.", close: "Закрыть" }
 };
-let timer = null, cur = null, t = 0, playing = false, last = 0, shown = -1, wantPlay = false;
-
-function stop() { if (timer) cancelAnimationFrame(timer); timer = null; playing = false; }
-function fmt(s) { s = Math.floor(s); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`; }
-
-function home() {
-  stop(); cur = null;
-  document.getElementById("langbtn").hidden = false;
-  document.getElementById("head").textContent = u().head;
-  document.getElementById("subhead").textContent = u().sub;
-  const seen = store.get();
-  app.innerHTML = `<ul class="tasks">${TASKS.map(x => `<li><button class="task" data-go="${x.id}">
-      <span class="ic">${svg(x.icon)}</span>
-      <span style="min-width:0"><strong>${x.lname}</strong><small>${x.ldesc}</small></span>
-      <span class="len">▶ ${u().len}${seen.includes(x.id) ? `<span class="seen">${u().seen}</span>` : ""}</span>
-    </button></li>`).join("")}</ul>${note()}`;
+const PHRASES = {
+  ko: ["멈추세요!", "위험합니다. 비키세요.", "안전모를 쓰세요.", "여기는 들어가면 안 됩니다.", "다쳤어요. 도와주세요.", "119를 불러 주세요."],
+  zh: ["停下！", "危险，请让开。", "请戴好安全帽。", "这里不能进入。", "我受伤了，请帮帮我。", "请拨打119。"],
+  vi: ["Dừng lại!", "Nguy hiểm, hãy tránh ra.", "Hãy đội mũ bảo hộ.", "Không được vào đây.", "Tôi bị thương, hãy giúp tôi.", "Hãy gọi 119."],
+  th: ["หยุด!", "อันตราย หลีกไป", "กรุณาสวมหมวกนิรภัย", "ห้ามเข้าตรงนี้", "ฉันบาดเจ็บ ช่วยด้วย", "ช่วยโทร 119"],
+  ru: ["Стой!", "Опасно, отойдите.", "Наденьте каску.", "Сюда входить нельзя.", "Я получил травму, помогите.", "Вызовите 119."]
+};
+const SPEAKER = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9zM16 9c1.500 1.500 1.500 4.500 0 6M19 6c3 3 3 9 0 12"/></svg>';
+const VOICE = { ko: "ko-KR", zh: "zh-CN", vi: "vi-VN", th: "th-TH", ru: "ru-RU" };
+const DURATION = 60;
+const app = document.getElementById("app"), tabs = document.getElementById("tabs"), overlay = document.getElementById("overlay");
+const u2 = () => UI2[lang || "ko"];
+function saved(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+function keep(k, v) { try { v ? localStorage.setItem(k, v) : localStorage.removeItem(k); } catch (e) {} }
+const store = {
+  get() { try { return JSON.parse(saved("seen") || "[]"); } catch (e) { return []; } },
+  add(id) { const s = new Set(store.get()); s.add(id); keep("seen", JSON.stringify([...s])); }
+};
+let soundLang = saved("sound"), target = saved("target");
+const activeSound = () => soundLang || lang || "ko";
+const activeTarget = () => target || (lang === "ko" ? "zh" : "ko");
+function speak(text, l) {
+  try {
+    if (window.AndroidTTS) { window.AndroidTTS.speak(text, VOICE[l]); return; }
+    if (!window.speechSynthesis) return;
+    speechSynthesis.cancel();
+    const m = new SpeechSynthesisUtterance(text);
+    m.lang = VOICE[l];
+    speechSynthesis.speak(m);
+  } catch (e) {}
 }
-function note() {
-  return `<div class="note">
-    <p><strong>${u().n1}</strong> ${u().n1b}</p>
-    <p>${u().n2}</p>
-    <p>${u().n3}</p></div>`;
+function hush() {
+  try { if (window.AndroidTTS) window.AndroidTTS.stop(); else if (window.speechSynthesis) speechSynthesis.cancel(); } catch (e) {}
+}
+function textIn(task, i, l) {
+  const o = (I18N[l] || {})[task.id];
+  return (o ? [...o[2], ...o[3]] : [...task.steps, ...task.warns].map(s => s[1]))[i];
+}
+let timer = null, cur = null, t = 0, playing = false, last = 0, shown = -1, wantPlay = false;
+function stop() { if (timer) cancelAnimationFrame(timer); timer = null; playing = false; hush(); }
+function fmt(s) { s = Math.floor(s); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`; }
+function page(cls) { document.body.className = cls; window.scrollTo(0, 0); }
+function showTabs(active) {
+  tabs.hidden = false;
+  tabs.innerHTML = `<button class="${active === "v" ? "on" : ""}" data-go="">${u2().tabV}</button><button class="${active === "t" ? "on" : ""}" data-go="talk">${u2().tabT}</button>`;
+}
+function note() { return `<div class="note"><p><strong>${u().n1}</strong> ${u().n1b}</p><p>${u().n2}</p><p>${u().n3}</p></div>`; }
+function langBtn() { return `<button class="langbtn" data-picker>${LANGS.find(l => l.id === lang).name}</button>`; }
+function home() {
+  stop(); cur = null; page("home"); showTabs("v");
+  const seen = store.get();
+  app.innerHTML = `<div class="top"><h1>${u2().work}</h1>${langBtn()}</div>
+    <div class="tiles">${TASKS.map(x => `<button class="tile" data-go="${x.id}">${svg(x.icon)}<span>${x.lname}</span>${seen.includes(x.id) ? `<span class="seen">✓ ${u().seen}</span>` : ""}</button>`).join("")}</div>${note()}`;
 }
 function picker() {
-  stop(); cur = null;
+  stop(); cur = null; page("home"); tabs.hidden = true;
   document.documentElement.lang = lang || "ko";
-  document.getElementById("langbtn").hidden = true;
-  document.getElementById("head").textContent = "언어 · 语言 · Ngôn ngữ";
-  document.getElementById("subhead").textContent = "ภาษา · Язык";
-  app.innerHTML = `<ul class="langs">${LANGS.map(l => `<li><button class="lang ${l.id === lang ? "on" : ""}" data-lang="${l.id}" lang="${l.id}"><strong>${l.name}</strong><small>${l.kr}</small></button></li>`).join("")}</ul>`;
+  app.innerHTML = `<h1>언어 · 语言 · Ngôn ngữ<br>ภาษา · Язык</h1><ul class="langs">${LANGS.map(l => `<li><button class="lang ${l.id === lang ? "on" : ""}" data-lang="${l.id}" lang="${l.id}"><strong>${l.name}</strong><small lang="ko">${l.kr}</small></button></li>`).join("")}</ul>`;
+}
+function chipRow(label, kind, active, withOff) {
+  return `<span>${label}</span><span class="chips">${Object.keys(SUBNAMES).map(k => `<button class="chip ${active === k ? "on" : ""}" data-${kind}="${k}" lang="${k}" aria-pressed="${active === k}">${SUBNAMES[k]}</button>`).join("")}${withOff ? `<button class="chip ${active === "off" ? "on" : ""}" data-${kind}="off" aria-pressed="${active === "off"}">${u2().off}</button>` : ""}</span>`;
 }
 function detail(task) {
-  stop(); cur = task; t = 0; shown = -1;
-  document.getElementById("langbtn").hidden = false;
-  document.getElementById("head").textContent = task.lname;
-  document.getElementById("subhead").textContent = task.ldesc;
-  const per = i => `data-scene="${i}"`;
-  const n = task.steps.length;
-  app.innerHTML = `<div><button class="back" data-go="">${u().back}</button></div>
-    <div class="player" id="player">
-      <div class="screen" id="screen"></div>
-      <div class="controls">
-        <button class="pp" id="pp" aria-label="재생"></button>
-        <div class="segs">${task.scenes.map((s, i) => `<button class="seg ${s.warn ? "warn" : ""}" ${per(i)} aria-label="${s.label}"><i><b></b></i></button>`).join("")}</div>
-        <span class="time" id="time"></span>
-      </div>
-      <div id="subbar">${subBar()}</div>
-    </div>
-    <section><h2>${u().doit}</h2><p class="hint">${u().hint}</p>
-      <ol class="rows">${task.scenes.slice(0, n).map((s, i) => `<li><button class="row" ${per(i)}><span class="n">${i + 1}</span><span class="t">${s.cap}</span></button></li>`).join("")}</ol></section>
-    <section><h2>${u().careful}</h2>
-      <ul class="rows">${task.scenes.slice(n).map((s, i) => `<li><button class="row warn" ${per(i + n)}><span class="n">!</span><span class="t">${s.cap}</span></button></li>`).join("")}</ul></section>
+  stop(); cur = task; t = 0; shown = -1; page("work"); showTabs("v");
+  app.innerHTML = `<div class="top"><button class="back" data-go="">${u().back}</button>${langBtn()}</div>
+    <h1>${task.lname}</h1>
+    <div class="player"><div class="screen" id="screen"></div>
+      <div class="controls"><button class="pp" id="pp" aria-label="${u().play}"></button>
+        <div class="segs">${task.scenes.map((s, i) => `<button class="seg ${s.warn ? "warn" : ""}" data-scene="${i}" aria-label="${s.label}"><i><b></b></i></button>`).join("")}</div>
+        <span class="time" id="time"></span></div></div>
+    <div class="media" id="media"></div>
+    <div class="cards">${task.scenes.map((s, i) => `<button class="card ${s.warn ? "warn" : ""}" data-scene="${i}"><span class="pic">${svg(s.icon)}${s.no ? NO : ""}</span><span class="mark">${s.warn ? (s.no ? "✕" : "!") : "○"}</span><span>${s.cap}</span></button>`).join("")}</div>
     ${note()}`;
-  draw();
+  drawMedia(); draw();
   if (wantPlay) play();
   wantPlay = false;
+}
+function drawMedia() {
+  document.getElementById("media").innerHTML = chipRow(u2().sound, "snd", activeSound(), true) + chipRow(u2().caption, "sub", activeSub(), true);
+}
+function talk() {
+  stop(); cur = null; page("work"); showTabs("t");
+  const a = PHRASES[lang], b = PHRASES[activeTarget()];
+  app.innerHTML = `<div class="top"><h1>${u2().tabT}</h1>${langBtn()}</div>
+    <div class="media" id="talkto">${chipRow(u2().to, "tgt", activeTarget(), false)}</div>
+    <p class="hint">${u2().tapHint}</p>
+    <div class="phrases">${a.map((p, i) => `<button class="phrase ${i === 0 ? "first" : ""}" data-say="${i}"><span><strong>${p}</strong><span lang="${activeTarget()}">${b[i]}</span></span>${SPEAKER}</button>`).join("")}</div>${note()}`;
 }
 function idx() { return Math.min(cur.scenes.length - 1, Math.floor(t / (DURATION / cur.scenes.length))); }
 function draw() {
@@ -355,75 +358,76 @@ function draw() {
   const i = idx(), per = DURATION / cur.scenes.length;
   if (i !== shown) {
     shown = i;
-    const s = cur.scenes[i];
-    document.getElementById("screen").innerHTML =
-      `<span class="badge ${s.warn ? "warn" : ""}">${s.label}</span><span class="sample">${u().sample}</span>
-       <div class="art">${svg(s.icon)}${s.no ? NO : ""}</div>${subText(cur, i) ? `<p class="cap" lang="${activeSub()}">${subText(cur, i)}</p>` : ""}`;
-    document.querySelectorAll(".row").forEach(r => r.classList.toggle("on", +r.dataset.scene === i));
+    const s = cur.scenes[i], sub = subText(cur, i);
+    document.getElementById("screen").innerHTML = `<span class="badge ${s.warn ? "warn" : ""}">${s.label}</span><span class="sample">${u().sample}</span><div class="art">${svg(s.icon)}${s.no ? NO : ""}</div>${sub ? `<p class="cap" lang="${activeSub()}">${sub}</p>` : ""}`;
+    document.querySelectorAll(".card").forEach(r => r.classList.toggle("now", +r.dataset.scene === i));
+    if (playing && activeSound() !== "off") speak(textIn(cur, i, activeSound()), activeSound());
   }
-  document.querySelectorAll(".seg b").forEach((b, k) => {
-    const f = Math.max(0, Math.min(1, (t - k * per) / per));
-    b.style.width = (f * 100) + "%";
-  });
+  document.querySelectorAll(".seg b").forEach((b, k) => { b.style.width = Math.max(0, Math.min(1, (t - k * per) / per)) * 100 + "%"; });
   document.getElementById("time").textContent = `${fmt(t)} / ${fmt(DURATION)}`;
   const pp = document.getElementById("pp");
   pp.setAttribute("aria-label", playing ? u().pause : u().play);
   pp.innerHTML = playing ? `<svg viewBox="0 0 24 24"><path d="M6 4h4v16H6zM14 4h4v16h-4z"/></svg>` : `<svg viewBox="0 0 24 24"><path d="M6 3l15 9-15 9z"/></svg>`;
-  document.getElementById("player").classList.toggle("paused", !playing);
+}
+function ended() {
+  const b = document.createElement("button"); b.className = "big"; b.id = "again"; b.textContent = u().again;
+  document.getElementById("screen").appendChild(b);
 }
 function tick(now) {
   if (!playing) return;
   t += (now - last) / 1000; last = now;
-  if (t >= DURATION) {
-    t = DURATION; playing = false; store.add(cur.id); draw();
-    const big = document.createElement("button");
-    big.className = "big"; big.id = "again"; big.textContent = u().again;
-    document.getElementById("screen").appendChild(big);
-    return;
-  }
+  if (t >= DURATION) { t = DURATION; playing = false; hush(); store.add(cur.id); draw(); ended(); return; }
   draw(); timer = requestAnimationFrame(tick);
 }
 function play() {
-  if (t >= DURATION) { t = 0; shown = -1; }
-  playing = true; last = performance.now(); draw();
+  if (t >= DURATION) t = 0;
+  shown = -1; playing = true; last = performance.now(); draw();
   timer = requestAnimationFrame(tick);
 }
-function pause() { stop(); draw(); }
-
-document.getElementById("langbtn").addEventListener("click", () => { picker(); window.scrollTo(0, 0); });
-app.addEventListener("click", e => {
-  const pick = e.target.closest("[data-lang]");
-  if (pick) { lang = pick.dataset.lang; langStore.set(lang); subLang = null; subStore.set(null); route(); window.scrollTo(0, 0); return; }
-  const sub = e.target.closest("[data-sub]");
-  if (sub && cur) {
-    subLang = sub.dataset.sub; subStore.set(subLang);
-    document.getElementById("subbar").innerHTML = subBar();
-    shown = -1; draw();
-    const again = t >= DURATION;
-    if (again) { const big = document.createElement("button"); big.className = "big"; big.id = "again"; big.textContent = u().again; document.getElementById("screen").appendChild(big); }
+document.addEventListener("click", e => {
+  const c = s => e.target.closest(s);
+  let el;
+  if (c("#closeover")) { overlay.hidden = true; hush(); return; }
+  if ((el = c("[data-lang]"))) { lang = el.dataset.lang; langStore.set(lang); subLang = null; subStore.set(null); soundLang = null; keep("sound", null); target = null; keep("target", null); route(); return; }
+  if (c("[data-picker]")) { picker(); return; }
+  if ((el = c("[data-go]"))) {
+    wantPlay = !!el.dataset.go && el.dataset.go !== "talk";
+    if (location.hash.slice(1) === el.dataset.go) route(); else location.hash = el.dataset.go;
     return;
   }
-  const go = e.target.closest("[data-go]");
-  if (go) {
-    wantPlay = !!go.dataset.go;
-    if (location.hash.slice(1) === go.dataset.go) route(); else location.hash = go.dataset.go;
-    window.scrollTo(0, 0);
+  if ((el = c("[data-say]"))) {
+    const p = PHRASES[activeTarget()][+el.dataset.say];
+    overlay.innerHTML = `<p lang="${activeTarget()}">${p}</p><button id="closeover">${u2().close}</button>`;
+    overlay.hidden = false; speak(p, activeTarget());
     return;
   }
-  const sc = e.target.closest("[data-scene]");
-  if (sc && cur) {
-    t = +sc.dataset.scene * (DURATION / cur.scenes.length) + 0.01; shown = -1;
+  if ((el = c("[data-tgt]"))) { target = el.dataset.tgt; keep("target", target); talk(); return; }
+  if ((el = c("[data-sub]")) && cur) {
+    subLang = el.dataset.sub; subStore.set(subLang); drawMedia(); shown = -1;
+    const said = playing; playing = false; draw(); playing = said; if (t >= DURATION) ended();
+    return;
+  }
+  if ((el = c("[data-snd]")) && cur) {
+    soundLang = el.dataset.snd; keep("sound", soundLang); drawMedia(); hush();
+    if (playing && soundLang !== "off") speak(textIn(cur, idx(), activeSound()), activeSound());
+    return;
+  }
+  if ((el = c("[data-scene]")) && cur) {
+    t = +el.dataset.scene * (DURATION / cur.scenes.length) + 0.01;
     stop(); play();
-    if (sc.classList.contains("row")) document.getElementById("player").scrollIntoView({ behavior: "smooth", block: "start" });
+    if (el.classList.contains("card")) document.querySelector(".player").scrollIntoView({ behavior: "smooth", block: "start" });
     return;
   }
-  if (e.target.closest("#again")) { t = 0; shown = -1; play(); return; }
-  if (e.target.closest("#pp")) { playing ? pause() : play(); }
+  if (c("#again")) { t = 0; play(); return; }
+  if (c("#pp") && cur) { if (playing) { stop(); draw(); } else play(); }
 });
 function route() {
+  overlay.hidden = true;
   if (!lang) { picker(); return; }
   localize();
-  const task = TASKS.find(x => x.id === location.hash.slice(1));
+  const h = location.hash.slice(1);
+  if (h === "talk") { talk(); return; }
+  const task = TASKS.find(x => x.id === h);
   task ? detail(task) : home();
 }
 addEventListener("hashchange", route);
